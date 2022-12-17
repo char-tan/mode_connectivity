@@ -73,6 +73,8 @@ def setup_experiment(
 
     train_loader, test_loader = get_data_loaders(
         experiment_config.dataset,
+        train_kwargs,
+        test_kwargs,
         additional_train_transforms,
         additional_test_transforms,
     )
@@ -132,7 +134,17 @@ def run_simple_experiment(
 
 def get_device():
     use_cuda = torch.cuda.is_available()
-    device = torch.device("cuda" if use_cuda else "cpu")
+    try:
+        use_mps = torch.backends.mps.is_available()
+    except AttributeError:
+        use_mps = False
+    if use_cuda:
+        device = "cuda"
+    elif use_mps:
+        device = "mps"
+    else:
+        device = "cpu"
+    device = torch.device(device)
     if use_cuda:
         device_kwargs = {"num_workers": 1, "pin_memory": True, "shuffle": True}
     else:
