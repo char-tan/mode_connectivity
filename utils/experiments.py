@@ -13,6 +13,7 @@ from ..models.mlp import MLP
 from ..models.resnet import ResNet
 from ..models.vgg import VGG
 
+
 @dataclass
 class ExperimentConfig:
     model_factory: Callable
@@ -121,13 +122,14 @@ def run_simple_experiment(
     scheduler,
     log_interval,
     num_runs=1,
+    verbose: int = 2,
 ):
     # Need to do this because the train function takes an ArgumentParser object
     args = Namespace(log_interval=log_interval)
     for run in range(num_runs):
         for epoch in range(1, epochs + 1):
-            train(args, model, device, train_loader, optimizer, epoch, True)
-            test(model, device, test_loader, True)
+            train(args, model, device, train_loader, optimizer, epoch, True, verbose=verbose)
+            test(model, device, test_loader, True, verbose=verbose)
             if scheduler:
                 scheduler.step()
 
