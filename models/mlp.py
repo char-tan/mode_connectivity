@@ -7,7 +7,7 @@ class MLP(nn.Module):
     self.layer0 = nn.Linear(input, 512)
     self.layer1 = nn.Linear(512, 512)
     self.layer2 = nn.Linear(512, 512)
-    self.layer3 = nn.Linear(512, 10
+    self.layer3 = nn.Linear(512, 10)
 
 
   def forward(self, x):
