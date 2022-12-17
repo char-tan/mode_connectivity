@@ -1,7 +1,10 @@
 import matplotlib.pyplot as plt
 
-def plot_interp_acc(lambdas, train_acc_interp_naive, test_acc_interp_naive,
-                    train_acc_interp_clever, test_acc_interp_clever):
+def plot_interp_acc(n_points, train_acc_naive, test_acc_naive,
+                    train_acc_perm, test_acc_perm):
+
+  lambdas = torch.linspace(0, 1, steps=n_points)
+
   fig = plt.figure()
   ax = fig.add_subplot(111)
   ax.plot(lambdas,
