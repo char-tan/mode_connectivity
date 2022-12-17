@@ -1,4 +1,9 @@
+import torch
 import copy
+
+def load_checkpoint(model, model_path):
+    checkpoint = torch.load(model_path)
+    model.load_state_dict(checkpoint)   
 
 def flatten_params(model):
   return model.state_dict()
