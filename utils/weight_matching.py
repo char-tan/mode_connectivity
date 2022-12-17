@@ -209,7 +209,7 @@ def apply_permutation(ps: PermutationSpec, perm, params):
   """Apply a `perm` to `params`."""
   return {k: get_permuted_param(ps, perm, k, params) for k in params.keys()}
 
-def weight_matching(ps: PermutationSpec, params_a, params_b, max_iter=100, init_perm=None):
+def weight_matching(ps: PermutationSpec, params_a, params_b, max_iter=100, init_perm=None, verbose=2):
   """Find a permutation of `params_b` to make them match `params_a`."""
   perm_sizes = {p: params_a[axes[0][0]].shape[axes[0][1]] for p, axes in ps.perm_to_axes.items()}
 
@@ -234,7 +234,8 @@ def weight_matching(ps: PermutationSpec, params_a, params_b, max_iter=100, init_
       assert (torch.tensor(ri) == torch.arange(len(ri))).all()
       oldL = torch.einsum('ij,ij->i', A, torch.eye(n)[perm[p].long()]).sum()
       newL = torch.einsum('ij,ij->i', A,torch.eye(n)[ci, :]).sum()
-      print(f"{iteration}/{p}: {newL - oldL}")
+      if verbose > 0:
+        print(f"{iteration}/{p}: {newL - oldL}")
       progress = progress or newL > oldL + 1e-12
 
       perm[p] = torch.Tensor(ci)
