@@ -13,6 +13,7 @@ from ..models.mlp import MLP
 from ..models.resnet import ResNet
 from ..models.vgg import VGG
 
+
 @dataclass
 class ExperimentConfig:
     model_factory: Callable
@@ -63,7 +64,7 @@ def setup_experiment(
 ):
     device, device_kwargs = get_device()
 
-    torch.manual_seede(experiment_config.seed)
+    torch.manual_seed(experiment_config.seed)
 
     train_kwargs = {"batch_size": experiment_config.batch_size}
     test_kwargs = {"batch_size": experiment_config.batch_size}
@@ -73,6 +74,8 @@ def setup_experiment(
 
     train_loader, test_loader = get_data_loaders(
         experiment_config.dataset,
+        train_kwargs,
+        test_kwargs,
         additional_train_transforms,
         additional_test_transforms,
     )
@@ -119,20 +122,31 @@ def run_simple_experiment(
     scheduler,
     log_interval,
     num_runs=1,
+    verbose: int = 2,
 ):
     # Need to do this because the train function takes an ArgumentParser object
     args = Namespace(log_interval=log_interval)
     for run in range(num_runs):
         for epoch in range(1, epochs + 1):
-            train(args, model, device, train_loader, optimizer, epoch, True)
-            test(model, device, test_loader, True)
+            train(args, model, device, train_loader, optimizer, epoch, True, verbose=verbose)
+            test(model, device, test_loader, True, verbose=verbose)
             if scheduler:
                 scheduler.step()
 
 
 def get_device():
     use_cuda = torch.cuda.is_available()
-    device = torch.device("cuda" if use_cuda else "cpu")
+    try:
+        use_mps = torch.backends.mps.is_available()
+    except AttributeError:
+        use_mps = False
+    if use_cuda:
+        device = "cuda"
+    elif use_mps:
+        device = "mps"
+    else:
+        device = "cpu"
+    device = torch.device(device)
     if use_cuda:
         device_kwargs = {"num_workers": 1, "pin_memory": True, "shuffle": True}
     else:

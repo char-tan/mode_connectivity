@@ -39,7 +39,8 @@ DATASETS_DICT = {"mnist": MNIST_CONFIG, "cifar10": CIFAR10_CONFIG}
 
 def get_data_loaders(
     dataset: str,
-    batch_size: int,
+    train_kwargs,
+    test_kwargs,
     additional_train_transforms: Optional[List] = None,
     additional_test_transforms: Optional[List] = None,
     root="./data",
@@ -52,21 +53,21 @@ def get_data_loaders(
     if not additional_train_transforms:
         additional_train_transforms = []
 
-    train_transforms = additional_train_transforms + dataset_config.train_transforms
-    test_transforms = additional_test_transforms + dataset_config.test_transforms
+    train_transforms = transforms.Compose(additional_train_transforms + dataset_config.train_transforms)
+    test_transforms = transforms.Compose(additional_test_transforms + dataset_config.test_transforms)
 
     trainset = dataset_config.dataset(
         root=root, train=True, download=True, transform=train_transforms
     )
     train_loader = torch.utils.data.DataLoader(
-        trainset, batch_size=batch_size, shuffle=True, num_workers=2
+        trainset, shuffle=True, num_workers=2, **train_kwargs
     )
 
     testset = dataset_config.dataset(
         root=root, train=False, download=True, transform=test_transforms
     )
     test_loader = torch.utils.data.DataLoader(
-        testset, batch_size=batch_size, shuffle=False, num_workers=2
+        testset, shuffle=False, num_workers=2,  **test_kwargs
     )
 
     return train_loader, test_loader
