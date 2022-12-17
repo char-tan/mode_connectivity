@@ -4,7 +4,6 @@ import copy
 from .data import get_data_loaders
 from .utils import *
 from .training import test
-from .experiments import get_device
 
 def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points = 25):
     "evaluates interpolation between two models of same architecture"
@@ -16,8 +15,8 @@ def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_p
     # points to interpolate on
     lambdas = torch.linspace(0, 1, steps=n_points)
 
-    train_acc = []
-    test_acc = []
+    train_acc_list = []
+    test_acc_list = []
 
     for lam in lambdas:
 
@@ -27,16 +26,15 @@ def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_p
 
         # evaluate on train set
         train_loss, train_acc = test(model_b.to(device), device, train_loader)
-        train_acc.append(train_acc)
-
-        print(train_loss)
-        breakpoint()
+        train_acc_list.append(train_acc)
 
         # evaluate on test set
         test_loss, test_acc = test(model_b.to(device), device, test_loader)
-        test_acc.append(test_acc)
+        test_acc_list.append(test_acc)
 
-    return train_acc, test_acc
+        print(train_loss, test_loss)
+
+    return train_acc_list, test_acc_list
 
 def permute_model(model_a, model_b, num_hidden_layers = 3):
 
@@ -50,6 +48,7 @@ def permute_model(model_a, model_b, num_hidden_layers = 3):
     permuted_params = apply_permutation(permutation_spec, permutation, flatten_params(model_b))
 
     return permuted_params
+
 def run_wm_experiment(
         model_factory,
         model_path_a,
@@ -67,7 +66,9 @@ def run_wm_experiment(
     model_b = model_factory()
     #load_checkpoint(model_b, model_path_b)
 
-    train_loader, test_loader = get_data_loaders(dataset, batch_size)
+    dataloader_kwargs = {'batch_size' : 512} # TODO can prob increase (no grads)
+
+    train_loader, test_loader = get_data_loaders(dataset, dataloader_kwargs, dataloader_kwargs)
 
     # interpolate naively between models
     train_acc_naive, test_acc_naive = model_interpolation(model_a, model_b, train_loader, test_loader, device)
