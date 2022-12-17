@@ -63,7 +63,7 @@ def setup_experiment(
 ):
     device, device_kwargs = get_device()
 
-    torch.manual_seede(experiment_config.seed)
+    torch.manual_seed(experiment_config.seed)
 
     train_kwargs = {"batch_size": experiment_config.batch_size}
     test_kwargs = {"batch_size": experiment_config.batch_size}
