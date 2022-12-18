@@ -3,7 +3,7 @@ import copy
 
 from utils.data import get_data_loaders
 from utils.utils import *
-from utils.training import test
+from utils.training_utils import test
 from utils.weight_matching import *
 from utils.plot import plot_interp_acc
 
@@ -51,7 +51,7 @@ def permute_model(model_a, model_b, num_hidden_layers = 3):
 
     return permuted_params
 
-def run_wm_experiment(
+def linear_mode_connect(
         model_factory,
         model_path_a,
         model_path_b,
