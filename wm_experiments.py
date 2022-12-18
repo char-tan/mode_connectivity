@@ -1,9 +1,13 @@
+import os
+
 import torch
 import copy
 
 from utils.data import get_data_loaders
 from utils.utils import *
 from utils.training import test
+from utils.weight_matching import *
+from utils.plot import plot_interp_acc
 
 def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points = 25):
     "evaluates interpolation between two models of same architecture"
@@ -20,6 +24,8 @@ def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_p
 
     for lam in lambdas:
 
+        print(f'lam = {lam}')
+
         # linear interpolate model state dicts and load model
         lerp_model = lerp(lam, model_a_dict, model_b_dict)
         model_b.load_state_dict(lerp_model)
@@ -31,8 +37,6 @@ def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_p
         # evaluate on test set
         test_loss, test_acc = test(model_b.to(device), device, test_loader)
         test_acc_list.append(test_acc)
-
-        print(train_loss, test_loss)
 
     return train_acc_list, test_acc_list
 
@@ -61,23 +65,34 @@ def run_wm_experiment(
 
     # init models and load weights
     model_a = model_factory()
-    #load_checkpoint(model_a, model_path_a)
+    load_checkpoint(model_a, model_path_a)
 
     model_b = model_factory()
-    #load_checkpoint(model_b, model_path_b)
+    load_checkpoint(model_b, model_path_b)
 
     dataloader_kwargs = {'batch_size' : 512} # TODO can prob increase (no grads)
 
     train_loader, test_loader = get_data_loaders(dataset, dataloader_kwargs, dataloader_kwargs)
 
+    print('performing naive interpolation')
+
     # interpolate naively between models
-    train_acc_naive, test_acc_naive = model_interpolation(model_a, model_b, train_loader, test_loader, device)
+    train_acc_naive, test_acc_naive = model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points = n_points)
+
+    print('permuting model')
 
     # perform weight matching and permute model b
-    permuted_params = permute_model(model_a, model_b, num_hidden_layers = 3)
+    permuted_params = permute_model(model_a.cpu(), model_b.cpu(), num_hidden_layers = 3)
+
+    print('performing permuted interpolation')
+
+    model_b.load_state_dict(permuted_params)
 
     # interpolate between model_a and permuted model_b
-    train_acc_perm, test_acc_perm = model_interpolation(model_a, permuted_params, train_loader, test_loader, device)
+    train_acc_perm, test_acc_perm = model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points = n_points)
 
     fig = plot_interp_acc(n_points, train_acc_naive, test_acc_naive,
-                    train_acc_clever, test_acc_clever)
+                    train_acc_perm, test_acc_perm)
+
+    fig.canvas.draw()
+    fig.show()
