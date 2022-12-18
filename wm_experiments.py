@@ -1,5 +1,3 @@
-import os
-
 import torch
 import copy
 
@@ -93,6 +91,3 @@ def run_wm_experiment(
 
     fig = plot_interp_acc(n_points, train_acc_naive, test_acc_naive,
                     train_acc_perm, test_acc_perm)
-
-    fig.canvas.draw()
-    fig.show()
