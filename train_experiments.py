@@ -5,14 +5,14 @@ from dataclasses import dataclass
 from typing import List, Optional, Callable, Dict
 from argparse import Namespace
 
-from .data import get_data_loaders
-from .training import train, test
-from .utils import get_device
+from utils.data import get_data_loaders
+from utils.training import train, test
+from utils.utils import get_device
 
-from ..models.cnn import CNN
-from ..models.mlp import MLP
-from ..models.resnet import ResNet
-from ..models.vgg import VGG
+from models.cnn import CNN
+from models.mlp import MLP
+from models.resnet import ResNet
+from models.vgg import VGG
 
 @dataclass
 class TrainConfig:

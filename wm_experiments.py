@@ -1,9 +1,9 @@
 import torch
 import copy
 
-from .data import get_data_loaders
-from .utils import *
-from .training import test
+from utils.data import get_data_loaders
+from utils.utils import *
+from utils.training import test
 
 def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points = 25):
     "evaluates interpolation between two models of same architecture"
