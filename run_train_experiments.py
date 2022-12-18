@@ -15,4 +15,4 @@ experiment_config.seed = 42
 model_b,device,train_loader,test_loader,optimizer,epochs,scheduler,log_interval = setup_train(experiment_config)
 run_training(model_b,device,train_loader,test_loader,optimizer,epochs,scheduler,log_interval, verbose=1)
 
-torch.save(model_b.state_dict(), 'model_a.pt')
+torch.save(model_b.state_dict(), 'model_b.pt')
