@@ -79,7 +79,7 @@ def linear_mode_connect(
 
     print('permuting model')
 
-    count_layers(model_a)
+    num_hidden_layers = count_layers(model_a)
 
     # perform weight matching and permute model b
     permuted_params = permute_model(model_a.cpu(), model_b.cpu(), num_hidden_layers = 3)
