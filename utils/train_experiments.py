@@ -7,6 +7,7 @@ from argparse import Namespace
 
 from .data import get_data_loaders
 from .training import train, test
+from .utils import get_device
 
 from ..models.cnn import CNN
 from ..models.mlp import MLP
