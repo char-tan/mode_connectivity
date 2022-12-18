@@ -1,18 +1,21 @@
 import torch
-from train_experiments import *
 
-experiment_config = MLP_MNIST_DEFAULT
-experiment_config.epochs = 10
-experiment_config.seed = 7
+from training_config import MLP_MNIST_DEFAULT
+from training import setup_train, train_model
 
-model_a,device,train_loader,test_loader,optimizer,epochs,scheduler,log_interval = setup_train(experiment_config)
-run_training(model_a,device,train_loader,test_loader,optimizer,epochs,scheduler,log_interval, verbose=1)
+training_config = MLP_MNIST_DEFAULT
+training_config.epochs = 10
+training_config.seed = 7
 
+training_config.batch_size = 1
+
+# train model a
+model_a = train_model(*setup_train(training_config), verbose = 2)
 torch.save(model_a.state_dict(), 'model_a.pt')
 
-# Change seed to get different model
+# change seed to get different model
 experiment_config.seed = 42
-model_b,device,train_loader,test_loader,optimizer,epochs,scheduler,log_interval = setup_train(experiment_config)
-run_training(model_b,device,train_loader,test_loader,optimizer,epochs,scheduler,log_interval, verbose=1)
 
+# train model b
+model_a = train_model(*setup_train(training_config), verbose = 2)
 torch.save(model_b.state_dict(), 'model_b.pt')
