@@ -66,8 +66,8 @@ def setup_train(
 
     torch.manual_seed(train_config.seed)
 
-    train_kwargs = {"batch_size": train_config.batch_size}
-    test_kwargs = {"batch_size": train_config.batch_size}
+    train_kwargs = {"batch_size": train_config.batch_size, "shuffle": True}
+    test_kwargs = {"batch_size": train_config.batch_size, "shuffle": False}
 
     train_kwargs.update(device_kwargs)
     test_kwargs.update(device_kwargs)

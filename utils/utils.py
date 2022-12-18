@@ -19,7 +19,7 @@ def get_device():
         device = "cpu"
     device = torch.device(device)
     if use_cuda:
-        device_kwargs = {"num_workers": 1, "pin_memory": True, "shuffle": True}
+        device_kwargs = {"num_workers": 1, "pin_memory": True}
     else:
         device_kwargs = {}
 
