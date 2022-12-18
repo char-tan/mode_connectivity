@@ -1,8 +1,14 @@
 import torch
 import copy
 
-def load_checkpoint(model, model_path):
-    checkpoint = torch.load(model_path)
+def count_layers(model):
+    for name, param in model.named_parameters():
+        print(name, param.size())
+
+    return
+
+def load_checkpoint(model, model_path, device):
+    checkpoint = torch.load(model_path, map_location = device)
     model.load_state_dict(checkpoint)   
 
 def get_device():

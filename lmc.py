@@ -63,10 +63,10 @@ def linear_mode_connect(
 
     # init models and load weights
     model_a = model_factory()
-    load_checkpoint(model_a, model_path_a)
+    load_checkpoint(model_a, model_path_a, device)
 
     model_b = model_factory()
-    load_checkpoint(model_b, model_path_b)
+    load_checkpoint(model_b, model_path_b, device)
 
     dataloader_kwargs = {'batch_size' : 512} # TODO can prob increase (no grads)
 
@@ -78,6 +78,8 @@ def linear_mode_connect(
     train_acc_naive, test_acc_naive = model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points = n_points)
 
     print('permuting model')
+
+    count_layers(model_a)
 
     # perform weight matching and permute model b
     permuted_params = permute_model(model_a.cpu(), model_b.cpu(), num_hidden_layers = 3)
