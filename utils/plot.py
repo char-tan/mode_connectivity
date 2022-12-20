@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+from typing import Dict, Tuple
+from matplotlib import markers
 
 
 def plot_interp_metric(
@@ -71,3 +73,20 @@ def plot_interp_acc(
         train_acc_interp_clever,
         test_acc_interp_clever,
     )
+
+def plot_metric_contour(metric_name, t1s, t2s, metric_grid, model_vectors_dict: Dict[str, Tuple]):
+    "Generate a contour plot of the loss landscape, along with points at x,y coordinates corresponding to models in model_vectors."
+    fig = plt.figure(figsize = (6,5),dpi=100)
+    fig.patch.set_facecolor('white')
+    plt.title(f"{metric_name.title()} weight space cut")
+
+    plt.contourf(t1s,t2s,metric_grid.T,cmap=plt.cm.viridis, levels=40)
+    plt.colorbar()
+
+    for ((model_name, (x, y)), marker) in zip(model_vectors_dict.items(), markers.MarkerStyle.markers.keys()):
+        plt.scatter([x],[y], marker=marker, label=model_name,s=150)
+
+    plt.xlabel("Weight direction 1",fontsize = 16)
+    plt.ylabel("Weight direction 2",fontsize = 16)
+    plt.legend(fontsize=10,ncol=1)
+    plt.show()
