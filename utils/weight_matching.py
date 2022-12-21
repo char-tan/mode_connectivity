@@ -5,8 +5,6 @@ from typing import NamedTuple
 import torch
 from scipy.optimize import linear_sum_assignment
 
-
-
 class PermutationSpec(NamedTuple):
   perm_to_axes: dict
   axes_to_perm: dict
@@ -18,21 +16,6 @@ def permutation_spec_from_axes_to_perm(axes_to_perm: dict) -> PermutationSpec:
       if perm is not None:
         perm_to_axes[perm].append((wk, axis))
   return PermutationSpec(perm_to_axes=dict(perm_to_axes), axes_to_perm=axes_to_perm)
-
-"""
-def cnn_permutation_spec() -> PermutationSpec:
-  conv = lambda name, p_in, p_out: {f"{name}.weight": (p_out, p_in, None, None, )}
-  dense = lambda name, p_in, p_out, bias=True: {f"{name}.weight": (p_out, p_in), f"{name}.bias": (p_out, )} if bias else  {f"{name}.weight": (p_out, p_in)}
-
-  return permutation_spec_from_axes_to_perm({
-     **conv("conv1", None, "P_bg0"),
-     **conv("conv2", "P_bg0", "P_bg1"),
-     **dense("fc1", "P_bg1", "P_bg2"),
-     **dense("fc2", "P_bg2", None, False),
-  })
-"""
-
-
 
 def resnet20_permutation_spec() -> PermutationSpec:
   conv = lambda name, p_in, p_out: {f"{name}.weight": (p_out, p_in, None, None, )}
