@@ -1,11 +1,9 @@
-import os
-
 import torch
 import copy
 
 from utils.data import get_data_loaders
 from utils.utils import *
-from utils.training import test
+from utils.training_utils import test
 from utils.weight_matching import *
 from utils.plot import plot_interp_acc
 
@@ -53,7 +51,7 @@ def permute_model(model_a, model_b, num_hidden_layers = 3):
 
     return permuted_params
 
-def run_wm_experiment(
+def linear_mode_connect(
         model_factory,
         model_path_a,
         model_path_b,
@@ -65,10 +63,10 @@ def run_wm_experiment(
 
     # init models and load weights
     model_a = model_factory()
-    load_checkpoint(model_a, model_path_a)
+    load_checkpoint(model_a, model_path_a, device)
 
     model_b = model_factory()
-    load_checkpoint(model_b, model_path_b)
+    load_checkpoint(model_b, model_path_b, device)
 
     dataloader_kwargs = {'batch_size' : 512} # TODO can prob increase (no grads)
 
@@ -80,6 +78,8 @@ def run_wm_experiment(
     train_acc_naive, test_acc_naive = model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points = n_points)
 
     print('permuting model')
+
+    num_hidden_layers = count_layers(model_a)
 
     # perform weight matching and permute model b
     permuted_params = permute_model(model_a.cpu(), model_b.cpu(), num_hidden_layers = 3)
@@ -93,6 +93,3 @@ def run_wm_experiment(
 
     fig = plot_interp_acc(n_points, train_acc_naive, test_acc_naive,
                     train_acc_perm, test_acc_perm)
-
-    fig.canvas.draw()
-    fig.show()
