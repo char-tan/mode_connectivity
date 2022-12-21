@@ -12,6 +12,7 @@ class MLP(nn.Module):
         self.layer2 = nn.Linear(512, 512)
         self.layer3 = nn.Linear(512, 10)
 
+        # TODO? arbitrary depth, width, output classes?
         num_hidden_layers = 3
 
         """We assume that one permutation cannot appear in two axes of the same weight array."""
