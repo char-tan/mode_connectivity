@@ -40,8 +40,7 @@ def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_p
 
 def permute_model(model_a, model_b, num_hidden_layers = 3):
 
-    # produces specification for permuation?
-    permutation_spec = mlp_permutation_spec(num_hidden_layers = num_hidden_layers) # TODO variable layers
+    permutation_spec = model_a.permutation_spec
 
     # finds permuation using weight matching
     permutation = weight_matching(permutation_spec, flatten_params(model_a), flatten_params(model_b))
@@ -75,7 +74,7 @@ def linear_mode_connect(
     print('performing naive interpolation')
 
     # interpolate naively between models
-    train_acc_naive, test_acc_naive = model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points = n_points)
+    #train_acc_naive, test_acc_naive = model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points = n_points)
 
     print('permuting model')
 

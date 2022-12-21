@@ -19,19 +19,6 @@ def permutation_spec_from_axes_to_perm(axes_to_perm: dict) -> PermutationSpec:
         perm_to_axes[perm].append((wk, axis))
   return PermutationSpec(perm_to_axes=dict(perm_to_axes), axes_to_perm=axes_to_perm)
 
-def mlp_permutation_spec(num_hidden_layers: int) -> PermutationSpec:
-  """We assume that one permutation cannot appear in two axes of the same weight array."""
-  assert num_hidden_layers >= 1
-  return permutation_spec_from_axes_to_perm({
-      "layer0.weight": ("P_0", None),
-      **{f"layer{i}.weight": ( f"P_{i}", f"P_{i-1}")
-         for i in range(1, num_hidden_layers)},
-      **{f"layer{i}.bias": (f"P_{i}", )
-         for i in range(num_hidden_layers)},
-      f"layer{num_hidden_layers}.weight": (None, f"P_{num_hidden_layers-1}"),
-      f"layer{num_hidden_layers}.bias": (None, ),
-  })
-
 """
 def cnn_permutation_spec() -> PermutationSpec:
   conv = lambda name, p_in, p_out: {f"{name}.weight": (p_out, p_in, None, None, )}
