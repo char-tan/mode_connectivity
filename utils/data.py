@@ -4,6 +4,7 @@ from torchvision import transforms, datasets
 from dataclasses import dataclass
 from typing import List, Callable, Optional
 
+
 @dataclass
 class DatasetConfig:
     train_transforms: List
@@ -60,14 +61,14 @@ def get_data_loaders(
         root=root, train=True, download=True, transform=train_transforms
     )
     train_loader = torch.utils.data.DataLoader(
-        trainset, shuffle=True, num_workers=2, **train_kwargs
+        trainset, **train_kwargs
     )
 
     testset = dataset_config.dataset(
         root=root, train=False, download=True, transform=test_transforms
     )
     test_loader = torch.utils.data.DataLoader(
-        testset, shuffle=False, num_workers=2,  **test_kwargs
+        testset, **test_kwargs
     )
 
     return train_loader, test_loader
