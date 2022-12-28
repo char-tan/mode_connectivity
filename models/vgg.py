@@ -13,13 +13,12 @@ class VGG(nn.Module):
                 (512, 512, 512), 
                 (512, 512, 512)]
 
-        # TODO input and output dims of classifier depend on dataset
         classifier_cfg = {'input_dim' : 512, 'output_dim' : 10, 'width' : 4096}
 
         self.features = self._make_conv(conv_cfg)
         self.classifier = self._make_classifier(**classifier_cfg)
 
-        #self.permutation_spec = self._permutation_spec()
+        self.permutation_spec = self._permutation_spec()
 
     def forward(self, x):
 
