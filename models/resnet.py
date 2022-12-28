@@ -9,14 +9,15 @@ import numpy as np
 
 # never saw anyting about specific initialisation
 
-#def conv_init(m):
-#    classname = m.__class__.__name__
-#    if classname.find('Conv') != -1:
-#        init.xavier_uniform_(m.weight, gain=np.sqrt(2))
-#        init.constant_(m.bias, 0)
-#    elif classname.find('GroupNorm') != -1:
-#        init.constant_(m.weight, 1)
-#        init.constant_(m.bias, 0)
+# def conv_init(m):
+#     classname = m.__class__.__name__
+#     if classname.find('Conv') != -1:
+#         init.xavier_uniform_(m.weight, gain=np.sqrt(2))
+#         init.constant_(m.bias, 0)
+#     elif classname.find('GroupNorm') != -1:
+#         init.constant_(m.weight, 1)
+#         init.constant_(m.bias, 0)
+
 
 class Block(nn.Module):
     def __init__(self, in_chans, out_chans, stride, spatial_dim):
@@ -41,7 +42,7 @@ class Block(nn.Module):
                 ])
 
         else:
-            self.shortcut = lambda x : x
+            self.shortcut = lambda x: x
 
     def forward(self, x):
 
@@ -51,12 +52,13 @@ class Block(nn.Module):
         y = self.norm1(y)
         y = F.relu(y)
         y = self.conv2(y)
-        y = self.norm2(y) 
+        y = self.norm2(y)
 
         # go through shortcut
         x = self.shortcut(x)
 
         return F.relu(y + x)
+
 
 class BlockGroup(nn.Module):
     def __init__(self, in_chans, out_chans, blocks, stride, spatial_dim):
@@ -70,6 +72,7 @@ class BlockGroup(nn.Module):
     def forward(self, x):
         return self.blocks(x)
 
+
 class ResNet(nn.Module):
     def __init__(self, width_multiplier=1, num_classes=10):
         super().__init__()
@@ -79,8 +82,8 @@ class ResNet(nn.Module):
         self.conv1 = nn.Conv2d(3, 16 * wm, kernel_size=3, padding=1, bias=False)
         self.norm1 = nn.LayerNorm([16 * wm, 32, 32])
 
-        group_chans  = [16 * wm, 32 * wm, 64 * wm]
-        group_blocks = [3, 3, 3] # for resnet20
+        group_chans = [16 * wm, 32 * wm, 64 * wm]
+        group_blocks = [3, 3, 3]  # for resnet20
         group_strides = [1, 2, 2]
         group_spatial_dims = [32, 16, 8]
 
@@ -99,7 +102,7 @@ class ResNet(nn.Module):
     def forward(self, x):
 
         x = self.conv1(x)
-        x = self.norm1(x) 
+        x = self.norm1(x)
         x = F.relu(x)
         x = self.block_groups(x)
         x = F.avg_pool2d(x, kernel_size=8, stride=8)
