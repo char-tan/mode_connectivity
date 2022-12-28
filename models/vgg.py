@@ -46,7 +46,6 @@ class VGG(nn.Module):
                 layers += [
                         nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
                         nn.LayerNorm([out_channels, spatial_dim, spatial_dim]),
-                        #nn.BatchNorm2d(out_channels, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
                         nn.ReLU(),
                         ]
 
@@ -68,36 +67,36 @@ class VGG(nn.Module):
 
         return nn.Sequential(*layers)
 
-    #def _permutation_spec(self):
-    #    layers_with_conv = [3,7,10,14,17,20,24,27,30,34,37,40]
-    #    layers_with_conv_b4 = [0,3,7,10,14,17,20,24,27,30,34,37]
-    #    layers_with_bn = [4,8,11,15,18,21,25,28,31,35,38,41]
-    #    dense = lambda name, p_in, p_out, bias = True: {f"{name}.weight": (p_out, p_in), f"{name}.bias": (p_out, )}
+    def _permutation_spec(self):
+        layers_with_conv = [3,7,10,14,17,20,24,27,30,34,37,40]
+        layers_with_conv_b4 = [0,3,7,10,14,17,20,24,27,30,34,37]
+        layers_with_bn = [4,8,11,15,18,21,25,28,31,35,38,41]
+        dense = lambda name, p_in, p_out, bias = True: {f"{name}.weight": (p_out, p_in), f"{name}.bias": (p_out, )}
 
-    #    num_hidden_layers = 3
+        num_hidden_layers = 3
 
-    #    return permutation_spec_from_axes_to_perm({
-    #        # first features
-    #        "features.0.weight": ( "P_Conv_0",None, None, None),
-    #        "features.1.weight": ( "P_Conv_0", None),
-    #        "features.1.bias": ( "P_Conv_0", None),
+        return permutation_spec_from_axes_to_perm({
+            # first features
+            "features.0.weight": ( "P_Conv_0",None, None, None),
+            "features.1.weight": ( "P_Conv_0", None),
+            "features.1.bias": ( "P_Conv_0", None),
 
-    #        # conv layers
-    #        **{f"features.{layers_with_conv[i]}.weight": ( f"P_Conv_{layers_with_conv[i]}", f"P_Conv_{layers_with_conv_b4[i]}", None, None, )
-    #            for i in range(len(layers_with_conv))},
-    #        **{f"features.{i}.bias": (f"P_Conv_{i}", )
-    #            for i in layers_with_conv + [0]},
+            # conv layers
+            **{f"features.{layers_with_conv[i]}.weight": ( f"P_Conv_{layers_with_conv[i]}", f"P_Conv_{layers_with_conv_b4[i]}", None, None, )
+                for i in range(len(layers_with_conv))},
+            **{f"features.{i}.bias": (f"P_Conv_{i}", )
+                for i in layers_with_conv + [0]},
 
-    #        # batch norm
-    #        **{f"features.{layers_with_bn[i]}.weight": ( f"P_Conv_{layers_with_conv[i]}", None)
-    #            for i in range(len(layers_with_bn))},
-    #        **{f"features.{layers_with_bn[i]}.bias": ( f"P_Conv_{layers_with_conv[i]}", None)
-    #            for i in range(len(layers_with_bn))},
+            # batch norm
+            **{f"features.{layers_with_bn[i]}.weight": ( f"P_Conv_{layers_with_conv[i]}", None)
+                for i in range(len(layers_with_bn))},
+            **{f"features.{layers_with_bn[i]}.bias": ( f"P_Conv_{layers_with_conv[i]}", None)
+                for i in range(len(layers_with_bn))},
 
-    #        # classifier
-    #        "classifier.0.weight": ("P_Dense_0", f"P_Conv_{layers_with_conv[-1]}"),
-    #        "classifier.2.weight": ( f"P_Dense_2", f"P_Dense_0"),
-    #        "classifier.2.bias": ("P_Dense_2", ),
-    #        "classifier.4.weight": (None, "P_Dense_4}"),
-    #        "classifier.4.bias": (None, ),
-    #        })
+            # classifier
+            "classifier.0.weight": ("P_Dense_0", f"P_Conv_{layers_with_conv[-1]}"),
+            "classifier.2.weight": ( f"P_Dense_2", f"P_Dense_0"),
+            "classifier.2.bias": ("P_Dense_2", ),
+            "classifier.4.weight": (None, "P_Dense_4}"),
+            "classifier.4.bias": (None, ),
+            })
