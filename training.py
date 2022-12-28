@@ -4,17 +4,17 @@ from torchvision import transforms
 from typing import List, Optional, Callable, Dict
 from argparse import Namespace
 
-from utils.data import get_data_loaders
-from utils.training_utils import train, test
-from utils.utils import get_device
-from training_config import TrainingConfig
+from .utils.data import get_data_loaders
+from .utils.training_utils import train, test
+from .utils.utils import get_device
+from .training_config import TrainingConfig
 
 
 def setup_train(
     training_config: TrainingConfig,
     additional_train_transforms: Optional[List] = None,
     additional_test_transforms: Optional[List] = None,
-        ):
+):
 
     device, device_kwargs = get_device()
 
@@ -32,7 +32,7 @@ def setup_train(
         test_kwargs,
         additional_train_transforms,
         additional_test_transforms,
-        )
+    )
 
     if not training_config.model_kwargs:
         training_config.model_kwargs = {}
@@ -63,7 +63,7 @@ def setup_train(
         training_config.epochs,
         scheduler,
         training_config.log_interval,
-        )
+    )
 
 
 def train_model(
@@ -75,14 +75,16 @@ def train_model(
     epochs,
     scheduler,
     log_interval,
-    verbose: int = 2
-        ):
+    verbose: int = 2,
+):
 
     # Need to do this because the train function takes an ArgumentParser object
     args = Namespace(log_interval=log_interval)
 
     for epoch in range(1, epochs + 1):
-        train(args, model, device, train_loader, optimizer, epoch, True, verbose=verbose)
+        train(
+            args, model, device, train_loader, optimizer, epoch, True, verbose=verbose
+        )
         test(model, device, test_loader, True, verbose=verbose)
         if scheduler:
             scheduler.step()
