@@ -38,7 +38,6 @@ MLP_MNIST_DEFAULT = TrainingConfig(
 
 RESNET_CIFAR10_DEFAULT = TrainingConfig(
     model_factory=ResNet,
-    model_kwargs={"depth": 22, "width_multiplier": 2},
     dataset="cifar10",
     batch_size=100,
     lr=0.001,
