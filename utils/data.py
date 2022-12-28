@@ -4,6 +4,7 @@ from torchvision import transforms, datasets
 from dataclasses import dataclass
 from typing import List, Callable, Optional
 
+
 @dataclass
 class DatasetConfig:
     train_transforms: List

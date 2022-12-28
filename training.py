@@ -9,11 +9,12 @@ from utils.training_utils import train, test
 from utils.utils import get_device
 from training_config import TrainingConfig
 
+
 def setup_train(
     training_config: TrainingConfig,
     additional_train_transforms: Optional[List] = None,
     additional_test_transforms: Optional[List] = None,
-    ):
+        ):
 
     device, device_kwargs = get_device()
 
@@ -64,6 +65,7 @@ def setup_train(
         training_config.log_interval,
         )
 
+
 def train_model(
     model,
     device,
@@ -74,7 +76,7 @@ def train_model(
     scheduler,
     log_interval,
     verbose: int = 2
-    ):
+        ):
 
     # Need to do this because the train function takes an ArgumentParser object
     args = Namespace(log_interval=log_interval)
