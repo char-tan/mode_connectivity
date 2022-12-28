@@ -1,9 +1,9 @@
 import torch
 
-from training_config import MLP_MNIST_DEFAULT
+from training_config import VGG_CIFAR10_DEFAULT
 from training import setup_train, train_model
 
-training_config = MLP_MNIST_DEFAULT
+training_config = VGG_CIFAR10_DEFAULT
 training_config.epochs = 10
 training_config.seed = 7
 

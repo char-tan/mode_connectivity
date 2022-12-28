@@ -1,17 +1,6 @@
 import torch
 import copy
 
-def count_layers(model):
-    # TODO this will probably break, for e.g batchnorm
-
-    count = 0
-
-    for name, param in model.named_parameters():
-        print(name, param.size())
-        count += 1
-
-    return count // 2 - 1
-
 def load_checkpoint(model, model_path, device):
     checkpoint = torch.load(model_path, map_location = device)
     model.load_state_dict(checkpoint)   

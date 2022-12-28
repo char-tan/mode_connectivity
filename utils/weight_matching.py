@@ -126,41 +126,6 @@ def resnet50_permutation_spec() -> PermutationSpec:
 
 })
 
-
-
-def vgg16_permutation_spec() -> PermutationSpec:
-  layers_with_conv = [3,7,10,14,17,20,24,27,30,34,37,40]
-  layers_with_conv_b4 = [0,3,7,10,14,17,20,24,27,30,34,37]
-  layers_with_bn = [4,8,11,15,18,21,25,28,31,35,38,41]
-  dense = lambda name, p_in, p_out, bias = True: {f"{name}.weight": (p_out, p_in), f"{name}.bias": (p_out, )}
-  return permutation_spec_from_axes_to_perm({
-      # first features
-      "features.0.weight": ( "P_Conv_0",None, None, None),
-      "features.1.weight": ( "P_Conv_0", None),
-      "features.1.bias": ( "P_Conv_0", None),
-      "features.1.running_mean": ( "P_Conv_0", None),
-      "features.1.running_var": ( "P_Conv_0", None),
-      "features.1.num_batches_tracked": (),
-
-      **{f"features.{layers_with_conv[i]}.weight": ( f"P_Conv_{layers_with_conv[i]}", f"P_Conv_{layers_with_conv_b4[i]}", None, None, )
-        for i in range(len(layers_with_conv))},
-      **{f"features.{i}.bias": (f"P_Conv_{i}", )
-        for i in layers_with_conv + [0]},
-      # bn
-      **{f"features.{layers_with_bn[i]}.weight": ( f"P_Conv_{layers_with_conv[i]}", None)
-        for i in range(len(layers_with_bn))},
-      **{f"features.{layers_with_bn[i]}.bias": ( f"P_Conv_{layers_with_conv[i]}", None)
-        for i in range(len(layers_with_bn))},
-      **{f"features.{layers_with_bn[i]}.running_mean": ( f"P_Conv_{layers_with_conv[i]}", None)
-        for i in range(len(layers_with_bn))},
-      **{f"features.{layers_with_bn[i]}.running_var": ( f"P_Conv_{layers_with_conv[i]}", None)
-        for i in range(len(layers_with_bn))},
-      **{f"features.{layers_with_bn[i]}.num_batches_tracked": ()
-        for i in range(len(layers_with_bn))},
-
-      **dense("classifier", "P_Conv_40", "P_Dense_0", False),
-})
-
 def get_permuted_param(ps: PermutationSpec, perm, k: str, params, except_axis=None):
   """Get parameter `k` from `params`, with the permutations applied."""
   w = params[k]

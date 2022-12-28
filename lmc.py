@@ -38,7 +38,7 @@ def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_p
 
     return train_acc_list, test_acc_list
 
-def permute_model(model_a, model_b, num_hidden_layers = 3):
+def permute_model(model_a, model_b):
 
     permutation_spec = model_a.permutation_spec
 
@@ -74,14 +74,12 @@ def linear_mode_connect(
     print('performing naive interpolation')
 
     # interpolate naively between models
-    #train_acc_naive, test_acc_naive = model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points = n_points)
+    train_acc_naive, test_acc_naive = model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points = n_points)
 
     print('permuting model')
 
-    num_hidden_layers = count_layers(model_a)
-
     # perform weight matching and permute model b
-    permuted_params = permute_model(model_a.cpu(), model_b.cpu(), num_hidden_layers = 3)
+    permuted_params = permute_model(model_a.cpu(), model_b.cpu())
 
     print('performing permuted interpolation')
 
