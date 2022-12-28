@@ -7,81 +7,151 @@ from torch.autograd import Variable
 import sys
 import numpy as np
 
+# never saw anyting about specific initialisation
 
+#def conv_init(m):
+#    classname = m.__class__.__name__
+#    if classname.find('Conv') != -1:
+#        init.xavier_uniform_(m.weight, gain=np.sqrt(2))
+#        init.constant_(m.bias, 0)
+#    elif classname.find('GroupNorm') != -1:
+#        init.constant_(m.weight, 1)
+#        init.constant_(m.bias, 0)
 
-def conv3x3(in_planes, out_planes, stride=1):
-    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False)
+class Block(nn.Module):
+    def __init__(self, in_chans, out_chans, stride, spatial_dim):
+        super().__init__()
 
-def conv_init(m):
-    classname = m.__class__.__name__
-    if classname.find('Conv') != -1:
-        init.xavier_uniform_(m.weight, gain=np.sqrt(2))
-        init.constant_(m.bias, 0)
-    elif classname.find('GroupNorm') != -1:
-        init.constant_(m.weight, 1)
-        init.constant_(m.bias, 0)
+        # stride = stride
+        self.conv1 = nn.Conv2d(in_chans, out_chans, kernel_size=3, stride=stride, padding=1, bias=False)
+        self.norm1 = nn.LayerNorm([out_chans, spatial_dim, spatial_dim])
 
-class wide_basic(nn.Module):
-    def __init__(self, in_planes, planes, dropout_rate, stride=1):
-        super(wide_basic, self).__init__()
-        self.bn1 = nn.GroupNorm(1, in_planes)
-        self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=3, padding=1, bias=False)
-        self.dropout = nn.Dropout(p=dropout_rate)
-        self.bn2 = nn.GroupNorm(1, planes)
-        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
+        # stride = 1
+        self.conv2 = nn.Conv2d(out_chans, out_chans, kernel_size=3, stride=1, padding=1, bias=False)
+        self.norm2 = nn.LayerNorm([out_chans, spatial_dim, spatial_dim])
 
-        self.shortcut = nn.Sequential()
-        if stride != 1 or in_planes != planes:
-            self.shortcut = nn.Sequential(
-                nn.Conv2d(in_planes, planes, kernel_size=1, stride=stride, bias=False),
-                nn.GroupNorm(1, planes)
+        # if stride == 2, need to halve spatial dims of input for skip connection
+        if stride != 1:
+            assert stride == 2
 
+            # non-standard way of doing this, same as git-rebasin implementation
+            self.shortcut = nn.Sequential(*[
+                nn.Conv2d(in_chans, out_chans, kernel_size=3, stride=stride, padding=1, bias=False),
+                nn.LayerNorm([out_chans, spatial_dim, spatial_dim])
+                ])
+
+        else:
+            self.shortcut = lambda x : x
+
+    def forward(self, x):
+
+        # go through layers
+        y = x
+        y = self.conv1(y)
+        y = self.norm1(y)
+        y = F.relu(y)
+        y = self.conv2(y)
+        y = self.norm2(y) 
+
+        # go through shortcut
+        x = self.shortcut(x)
+
+        return F.relu(y + x)
+
+class BlockGroup(nn.Module):
+    def __init__(self, in_chans, out_chans, blocks, stride, spatial_dim):
+        super().__init__()
+
+        self.blocks = nn.Sequential(
+            *[Block(in_chans=in_chans, out_chans=out_chans, stride=stride, spatial_dim=spatial_dim)] +
+            [Block(in_chans=out_chans, out_chans=out_chans, stride=1, spatial_dim=spatial_dim) for _ in range(blocks - 1)]
             )
 
     def forward(self, x):
-        out = self.dropout(self.conv1(F.relu(self.bn1(x))))
-        out = self.conv2(F.relu(self.bn2(out)))
-        out += self.shortcut(x)
-
-        return out
+        return self.blocks(x)
 
 class ResNet(nn.Module):
-    def __init__(self, depth, widen_factor, dropout_rate, num_classes):
-        super(ResNet, self).__init__()
-        self.in_planes = 16
+    def __init__(self, width_multiplier=1, num_classes=10):
+        super().__init__()
 
-        assert ((depth-4)%6 ==0), 'Wide-resnet depth should be 6n+4'
-        n = (depth-4)/6
-        k = widen_factor
+        wm = width_multiplier
 
-        print('| Wide-Resnet %dx%d' %(depth, k))
-        nStages = [16, 16*k, 32*k, 64*k]
+        self.conv1 = nn.Conv2d(3, 16 * wm, kernel_size=3, padding=1, bias=False)
+        self.norm1 = nn.LayerNorm([16 * wm, 32, 32])
 
-        self.conv1 = conv3x3(3,nStages[0])
-        self.layer1 = self._wide_layer(wide_basic, nStages[1], n, dropout_rate, stride=1)
-        self.layer2 = self._wide_layer(wide_basic, nStages[2], n, dropout_rate, stride=2)
-        self.layer3 = self._wide_layer(wide_basic, nStages[3], n, dropout_rate, stride=2)
-        self.bn1 = nn.GroupNorm(1, nStages[3])
-        self.linear = nn.Linear(nStages[3], num_classes)
+        group_chans  = [16 * wm, 32 * wm, 64 * wm]
+        group_blocks = [3, 3, 3] # for resnet20
+        group_strides = [1, 2, 2]
+        group_spatial_dims = [32, 16, 8]
 
-    def _wide_layer(self, block, planes, num_blocks, dropout_rate, stride):
-        strides = [stride] + [1]*(int(num_blocks)-1)
-        layers = []
+        block_groups = []
 
-        for stride in strides:
-            layers.append(block(self.in_planes, planes, dropout_rate, stride))
-            self.in_planes = planes
+        in_chans = 16 * wm
 
-        return nn.Sequential(*layers)
+        for c, b, s, sd in zip(group_chans, group_blocks, group_strides, group_spatial_dims):
+            block_groups.append(BlockGroup(in_chans=in_chans, out_chans=c, blocks=b, stride=s, spatial_dim=sd))
+            in_chans = c
+
+        self.block_groups = nn.Sequential(*block_groups)
+
+        self.linear = nn.Linear(group_chans[-1], num_classes)
 
     def forward(self, x):
-        out = self.conv1(x)
-        out = self.layer1(out)
-        out = self.layer2(out)
-        out = self.layer3(out)
-        out = F.relu(self.bn1(out))
-        out = F.avg_pool2d(out, 8)
-        out = out.view(out.size(0), -1)
-        out = self.linear(out)
 
-        return out
+        x = self.conv1(x)
+        x = self.norm1(x) 
+        x = F.relu(x)
+        x = self.block_groups(x)
+        x = F.avg_pool2d(x, kernel_size=8, stride=8)
+        x = x.view(x.size(0), -1)
+        x = self.linear(x)
+        x = F.softmax(x)
+
+        return x
+
+#def resnet20_permutation_spec() -> PermutationSpec:
+#  conv = lambda name, p_in, p_out: {f"{name}.weight": (p_out, p_in, None, None, )}
+#  norm = lambda name, p: {f"{name}.weight": (p, ), f"{name}.bias": (p, )}
+#  dense = lambda name, p_in, p_out: {f"{name}.weight": (p_out, p_in), f"{name}.bias": (p_out, )}
+#
+#  # This is for easy blocks that use a residual connection, without any change in the number of channels.
+#  easyblock = lambda name, p: {
+#  **norm(f"{name}.bn1", p),
+#  **conv(f"{name}.conv1", p, f"P_{name}_inner"),
+#  **norm(f"{name}.bn2", f"P_{name}_inner"),
+#  **conv(f"{name}.conv2", f"P_{name}_inner", p),
+#  }
+#
+#  # This is for blocks that use a residual connection, but change the number of channels via a Conv.
+#  shortcutblock = lambda name, p_in, p_out: {
+#  **norm(f"{name}.bn1", p_in),
+#  **conv(f"{name}.conv1", p_in, f"P_{name}_inner"),
+#  **norm(f"{name}.bn2", f"P_{name}_inner"),
+#  **conv(f"{name}.conv2", f"P_{name}_inner", p_out),
+#  **conv(f"{name}.shortcut.0", p_in, p_out),
+#  **norm(f"{name}.shortcut.1", p_out),
+#  }
+#
+#  return permutation_spec_from_axes_to_perm({
+#    **conv("conv1", None, "P_bg0"),
+#    #
+#    **shortcutblock("layer1.0", "P_bg0", "P_bg1"),
+#    **easyblock("layer1.1", "P_bg1",),
+#    **easyblock("layer1.2", "P_bg1"),
+#    #**easyblock("layer1.3", "P_bg1"),
+#
+#    **shortcutblock("layer2.0", "P_bg1", "P_bg2"),
+#    **easyblock("layer2.1", "P_bg2",),
+#    **easyblock("layer2.2", "P_bg2"),
+#    #**easyblock("layer2.3", "P_bg2"),
+#
+#    **shortcutblock("layer3.0", "P_bg2", "P_bg3"),
+#    **easyblock("layer3.1", "P_bg3",),
+#    **easyblock("layer3.2", "P_bg3"),
+#   # **easyblock("layer3.3", "P_bg3"),
+#
+#    **norm("bn1", "P_bg3"),
+#
+#    **dense("linear", "P_bg3", None),
+#
+#})

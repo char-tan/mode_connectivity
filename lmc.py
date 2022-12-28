@@ -22,29 +22,28 @@ def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_p
 
     for lam in lambdas:
 
-        print(f'lam = {lam}')
-
         # linear interpolate model state dicts and load model
         lerp_model = lerp(lam, model_a_dict, model_b_dict)
         model_b.load_state_dict(lerp_model)
 
         # evaluate on train set
-        train_loss, train_acc = test(model_b.to(device), device, train_loader)
+        train_loss, train_acc = test(model_b.to(device), device, train_loader, verbose=0)
         train_acc_list.append(train_acc)
 
         # evaluate on test set
-        test_loss, test_acc = test(model_b.to(device), device, test_loader)
+        test_loss, test_acc = test(model_b.to(device), device, test_loader, verbose=0)
         test_acc_list.append(test_acc)
+
+        print(f'lam = {lam}, train loss = {train_loss}, test loss = {test_loss}')
 
     return train_acc_list, test_acc_list
 
-def permute_model(model_a, model_b, num_hidden_layers = 3):
+def permute_model(model_a, model_b, max_iter):
 
-    # produces specification for permuation?
-    permutation_spec = mlp_permutation_spec(num_hidden_layers = num_hidden_layers) # TODO variable layers
+    permutation_spec = model_a.permutation_spec
 
     # finds permuation using weight matching
-    permutation = weight_matching(permutation_spec, flatten_params(model_a), flatten_params(model_b))
+    permutation = weight_matching(permutation_spec, flatten_params(model_a), flatten_params(model_b), max_iter=max_iter)
 
     # applies permutation
     permuted_params = apply_permutation(permutation_spec, permutation, flatten_params(model_b))
@@ -57,7 +56,8 @@ def linear_mode_connect(
         model_path_b,
         dataset,
         batch_size = 4098,
-        n_points = 25):
+        n_points = 25,
+        max_iter = 20):
 
     device, device_kwargs = get_device()
 
@@ -72,19 +72,17 @@ def linear_mode_connect(
 
     train_loader, test_loader = get_data_loaders(dataset, dataloader_kwargs, dataloader_kwargs)
 
-    print('performing naive interpolation')
+    print('\nperforming naive interpolation')
 
     # interpolate naively between models
     train_acc_naive, test_acc_naive = model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points = n_points)
 
-    print('permuting model')
-
-    num_hidden_layers = count_layers(model_a)
+    print('\npermuting model')
 
     # perform weight matching and permute model b
-    permuted_params = permute_model(model_a.cpu(), model_b.cpu(), num_hidden_layers = 3)
+    permuted_params = permute_model(model_a.cpu(), model_b.cpu(), max_iter)
 
-    print('performing permuted interpolation')
+    print('\nperforming permuted interpolation')
 
     model_b.load_state_dict(permuted_params)
 
