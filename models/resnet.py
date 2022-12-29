@@ -107,8 +107,8 @@ class ResNet(nn.Module):
 
     def _permutation_spec(self):
 
-        conv = lambda name, p_in, p_out: {f"{name}.weight": (p_out, p_in, None, None, )}
-        norm = lambda name, p: {f"{name}.weight": (p, ), f"{name}.bias": (p, )}
+        conv = lambda name, p_in, p_out: {f"{name}.weight": (p_out, p_in, None, None)}
+        norm = lambda name, p: {f"{name}.weight": (p,), f"{name}.bias": (p,)}
         linear = lambda name, p_in, p_out: {f"{name}.weight": (p_out, p_in), f"{name}.bias": (p_out,)}
 
         block = lambda name, p_in, p_inner, p_out: {
