@@ -24,12 +24,12 @@ class Block(nn.Module):
         super().__init__()
 
         # stride = stride
-        self.conv1 = nn.Conv2d(in_chans, out_chans, kernel_size=3, stride=stride, padding=1, bias=False)
-        self.norm1 = nn.LayerNorm([out_chans, spatial_dim, spatial_dim])
+        self.conv0 = nn.Conv2d(in_chans, out_chans, kernel_size=3, stride=stride, padding=1, bias=False)
+        self.norm0 = nn.LayerNorm([out_chans, spatial_dim, spatial_dim])
 
         # stride = 1
-        self.conv2 = nn.Conv2d(out_chans, out_chans, kernel_size=3, stride=1, padding=1, bias=False)
-        self.norm2 = nn.LayerNorm([out_chans, spatial_dim, spatial_dim])
+        self.conv1 = nn.Conv2d(out_chans, out_chans, kernel_size=3, stride=1, padding=1, bias=False)
+        self.norm1 = nn.LayerNorm([out_chans, spatial_dim, spatial_dim])
 
         # if stride == 2, need to halve spatial dims of input for skip connection
         if stride != 1:
@@ -48,11 +48,11 @@ class Block(nn.Module):
 
         # go through layers
         y = x
+        y = self.conv0(y)
+        y = self.norm0(y)
+        y = F.relu(y)
         y = self.conv1(y)
         y = self.norm1(y)
-        y = F.relu(y)
-        y = self.conv2(y)
-        y = self.norm2(y)
 
         # go through shortcut
         x = self.shortcut(x)
@@ -79,8 +79,8 @@ class ResNet(nn.Module):
 
         wm = width_multiplier
 
-        self.conv1 = nn.Conv2d(3, 16 * wm, kernel_size=3, padding=1, bias=False)
-        self.norm1 = nn.LayerNorm([16 * wm, 32, 32])
+        self.conv = nn.Conv2d(3, 16 * wm, kernel_size=3, padding=1, bias=False)
+        self.norm = nn.LayerNorm([16 * wm, 32, 32])
 
         group_chans = [16 * wm, 32 * wm, 64 * wm]
         group_blocks = [3, 3, 3]  # for resnet20
@@ -101,8 +101,8 @@ class ResNet(nn.Module):
 
     def forward(self, x):
 
-        x = self.conv1(x)
-        x = self.norm1(x)
+        x = self.conv(x)
+        x = self.norm(x)
         x = F.relu(x)
         x = self.block_groups(x)
         x = F.avg_pool2d(x, kernel_size=8, stride=8)
