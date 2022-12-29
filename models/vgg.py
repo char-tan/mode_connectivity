@@ -47,8 +47,7 @@ class VGG(nn.Module):
                     nn.Conv2d(
                         in_channels, out_channels, kernel_size=3, padding=1, bias=False
                     ),
-                    nn.BatchNorm2d(out_channels),
-                    #nn.LayerNorm([out_channels, spatial_dim, spatial_dim]),
+                    nn.LayerNorm([out_channels, spatial_dim, spatial_dim]),
                     nn.ReLU(),
                 ]
 
