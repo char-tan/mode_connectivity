@@ -35,11 +35,11 @@ class Block(nn.Module):
         if stride != 1:
             assert stride == 2
 
-            # non-standard way of doing this, same as git-rebasin implementation
-            self.shortcut = nn.Sequential(*[
-                nn.Conv2d(in_chans, out_chans, kernel_size=3, stride=stride, padding=1, bias=False),
-                nn.LayerNorm([out_chans, spatial_dim, spatial_dim])
-                ])
+            # strided 1x1 convolution to downsample
+            self.shortcut = nn.Conv2d(in_chans, out_chans, kernel_size=1, stride=2, padding=0, bias=False)
+
+            # replace random init with just 1s and freeze layer
+            self.shortcut.weight = nn.Parameter(torch.ones_like(self.shortcut.weight), requires_grad=False)
 
         else:
             self.shortcut = lambda x: x
