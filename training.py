@@ -47,10 +47,12 @@ def setup_train(
             weight_decay=training_config.weight_decay,
         )
 
-    if training_config.lr_scheduler:
+    if training_config.lr_scheduler == "cosine":
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
             optimizer, training_config.epochs
         )
+    elif training_config.lr_scheduler:
+        scheduler = scheduler(optimizer)
     else:
         scheduler = None
 
