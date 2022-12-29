@@ -65,7 +65,7 @@ class VGG(nn.Module):
 
         layers += [nn.Linear(input_dim, width), nn.ReLU()]
         layers += [nn.Linear(width, width), nn.ReLU()]
-        layers += [nn.Linear(width, output_dim), nn.Softmax()]
+        layers += [nn.Linear(width, output_dim)]
 
         return nn.Sequential(*layers)
 

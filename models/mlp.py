@@ -37,4 +37,4 @@ class MLP(nn.Module):
         x = nn.functional.relu(self.layer2(x))
         x = self.layer3(x)
 
-        return nn.functional.log_softmax(x)
+        return x
