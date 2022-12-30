@@ -83,9 +83,9 @@ def train_model(
 
     for epoch in range(1, epochs + 1):
         train(
-            args, model, device, train_loader, optimizer, epoch, True, verbose=verbose
+            args, model, device, train_loader, optimizer, epoch, verbose=verbose
         )
-        test(model, device, test_loader, True, verbose=verbose)
+        test(model, device, test_loader, verbose=verbose)
         if scheduler:
             scheduler.step()
 
