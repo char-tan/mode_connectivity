@@ -37,7 +37,7 @@ class Block(nn.Module):
 
             # non-standard way of doing this, same as git-rebasin implementation
             self.shortcut = nn.Sequential(*[
-                nn.Conv2d(in_chans, out_chans, kernel_size=3, stride=stride, padding=1, bias=False),
+                nn.Conv2d(in_chans, out_chans, kernel_size=1, stride=2, padding=0, bias=False),
                 nn.LayerNorm([out_chans, spatial_dim, spatial_dim])
                 ])
 

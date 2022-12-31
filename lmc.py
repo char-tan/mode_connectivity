@@ -1,11 +1,11 @@
 import torch
 import copy
 
-from utils.data import get_data_loaders
-from utils.utils import *
-from utils.training_utils import test
-from utils.weight_matching import *
-from utils.plot import plot_interp_acc
+from .utils.data import get_data_loaders
+from .utils.utils import *
+from .utils.training_utils import test
+from .utils.weight_matching import *
+from .utils.plot import plot_interp_acc
 
 
 def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points=25):
@@ -92,4 +92,5 @@ def linear_mode_connect(
     # interpolate between model_a and permuted model_b
     train_acc_perm, test_acc_perm = model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points=n_points)
 
-    fig = plot_interp_acc(n_points, train_acc_naive, test_acc_naive, train_acc_perm, test_acc_perm)
+    # fig = plot_interp_acc(n_points, train_acc_naive, test_acc_naive, train_acc_perm, test_acc_perm)
+
