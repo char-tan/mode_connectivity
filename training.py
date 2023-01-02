@@ -1,5 +1,6 @@
 import torch
 from torchvision import transforms
+from torch.utils.tensorboard import SummaryWriter
 
 from typing import List, Optional, Callable, Dict
 from argparse import Namespace
@@ -81,6 +82,7 @@ def train_model(
     scheduler,
     log_interval,
     verbose: int = 2,
+    tensorboard=False,
 ):
 
     # Need to do this because the train function takes an ArgumentParser object
@@ -96,6 +98,9 @@ def train_model(
             )
             scheduler.step_frequency = "epoch"
 
+    if tensorboard:
+        writer = SummaryWriter(log_dir="./tensorboard")
+
     for epoch in range(1, epochs + 1):
         train(
             args,
@@ -105,9 +110,15 @@ def train_model(
             optimizer,
             epoch,
             scheduler=scheduler,
+            writer=writer,
             verbose=verbose,
         )
-        test(model, device, test_loader, verbose=verbose)
+        test_loss, test_acc = test(model, device, test_loader, verbose=verbose)
+        if writer:
+            step = epoch * len(train_loader) + 1
+            writer.add_scalar("loss/test", test_loss, global_step=step)
+            writer.add_scalar("acc/test", test_acc, global_step=step)
+
         if scheduler:
             if scheduler.step_frequency == "epoch":
                 scheduler.step()
