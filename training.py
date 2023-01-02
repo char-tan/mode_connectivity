@@ -122,5 +122,8 @@ def train_model(
         if scheduler:
             if scheduler.step_frequency == "epoch":
                 scheduler.step()
+    
+    if writer:
+        writer.close()
 
     return model
