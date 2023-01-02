@@ -3,7 +3,7 @@ import torch
 
 
 def train(
-    args, model, device, train_loader, optimizer, epoch, verbose: int = 2
+    args, model, device, train_loader, optimizer, epoch, scheduler=None, verbose: int = 2
 ):
     model.train()
     correct = 0
@@ -18,6 +18,11 @@ def train(
         correct += pred.eq(target.view_as(pred)).sum().item()
         loss.backward()
         optimizer.step()
+
+        if scheduler:
+            if scheduler.step_frequency == "batch":
+                scheduler.step()
+
         if batch_idx % args.log_interval == 0:
             acc = 100.0 * correct / len(train_loader.dataset)
             if verbose >= 2:

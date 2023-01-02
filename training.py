@@ -51,8 +51,11 @@ def setup_train(
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
             optimizer, training_config.epochs
         )
+        scheduler.step_frequency = "epoch"
     elif training_config.lr_scheduler:
         scheduler = scheduler(optimizer)
+        if not hasattr(scheduler, "step_frequency"):
+            scheduler.step_frequency = "epoch"
     else:
         scheduler = None
 
@@ -83,12 +86,23 @@ def train_model(
     # Need to do this because the train function takes an ArgumentParser object
     args = Namespace(log_interval=log_interval)
 
+    if (verbose == 2) and (scheduler is not None):
+        scheduler.verbose = True
+
     for epoch in range(1, epochs + 1):
         train(
-            args, model, device, train_loader, optimizer, epoch, verbose=verbose
+            args,
+            model,
+            device,
+            train_loader,
+            optimizer,
+            epoch,
+            scheduler=scheduler,
+            verbose=verbose,
         )
         test(model, device, test_loader, verbose=verbose)
         if scheduler:
-            scheduler.step()
+            if scheduler.step_frequency == "epoch":
+                scheduler.step()
 
     return model
