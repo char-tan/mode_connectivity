@@ -86,8 +86,15 @@ def train_model(
     # Need to do this because the train function takes an ArgumentParser object
     args = Namespace(log_interval=log_interval)
 
-    if (verbose == 2) and (scheduler is not None):
-        scheduler.verbose = True
+    if scheduler is not None:
+        if verbose == 2:
+            scheduler.verbose = True
+
+        if not hasattr(scheduler, "step_frequency"):
+            print(
+                "Warning: scheduler has no attribute step_frequency set. Defaulting to step_frequency='epoch'."
+            )
+            scheduler.step_frequency = "epoch"
 
     for epoch in range(1, epochs + 1):
         train(
