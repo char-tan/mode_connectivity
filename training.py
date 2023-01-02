@@ -10,6 +10,8 @@ from .utils.training_utils import train, test
 from .utils.utils import get_device
 from .training_config import TrainingConfig
 
+from datetime import datetime
+
 
 def setup_train(
     training_config: TrainingConfig,
@@ -98,8 +100,13 @@ def train_model(
             )
             scheduler.step_frequency = "epoch"
 
-    
-    writer = SummaryWriter(log_dir="./tensorboard") if tensorboard else None
+    writer = (
+        SummaryWriter(
+            log_dir=f"./tensorboard/{datetime.now().strftime('%d%m%y_%H%M%S')}"
+        )
+        if tensorboard
+        else None
+    )
 
     for epoch in range(1, epochs + 1):
         train(
@@ -122,7 +129,7 @@ def train_model(
         if scheduler:
             if scheduler.step_frequency == "epoch":
                 scheduler.step()
-    
+
     if writer:
         writer.close()
 
