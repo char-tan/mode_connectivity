@@ -98,8 +98,8 @@ def train_model(
             )
             scheduler.step_frequency = "epoch"
 
-    if tensorboard:
-        writer = SummaryWriter(log_dir="./tensorboard")
+    
+    writer = SummaryWriter(log_dir="./tensorboard") if tensorboard else None
 
     for epoch in range(1, epochs + 1):
         train(
