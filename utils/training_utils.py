@@ -4,6 +4,7 @@ from torch.utils.tensorboard import SummaryWriter
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import _LRScheduler
 from typing import Optional
+import numpy as np
 
 
 def train(
@@ -38,7 +39,7 @@ def train(
                 writer.add_scalar("loss/train", loss, global_step=step)
                 writer.add_scalar("acc/train", acc, global_step=step)
                 if scheduler:
-                    writer.add_scalar("lr", scheduler.get_last_lr(), global_step=step)
+                    writer.add_scalar("lr", np.array(scheduler.get_last_lr()), global_step=step)
 
             if verbose >= 2:
                 print(
@@ -51,9 +52,9 @@ def train(
                     )
                 )
 
-            if scheduler:
-                if scheduler.step_frequency == "batch":
-                    scheduler.step()
+        if scheduler:
+            if scheduler.step_frequency == "batch":
+                scheduler.step()
 
     acc = 100.0 * correct / len(train_loader.dataset)
     if verbose >= 1:
