@@ -16,10 +16,22 @@ def train(
     epoch,
     scheduler: Optional[_LRScheduler] = None,
     writer: Optional[SummaryWriter] = None,
+    profile=False,
     verbose: int = 2,
 ):
     model.train()
     correct = 0
+
+    if profile:
+        prof = torch.profiler.profile(
+            schedule=torch.profiler.schedule(wait=2, warmup=2, active=5, repeat=2),
+            on_trace_ready=torch.profiler.tensorboard_trace_handler("./tensorboard/profile"),
+            record_shapes=True,
+            with_stack=True,
+            profile_memory=True
+        )
+        prof.start()
+
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
@@ -39,7 +51,9 @@ def train(
                 writer.add_scalar("loss/train", loss, global_step=step)
                 writer.add_scalar("acc/train", acc, global_step=step)
                 if scheduler:
-                    writer.add_scalar("lr", np.array(scheduler.get_last_lr()), global_step=step)
+                    writer.add_scalar(
+                        "lr", np.array(scheduler.get_last_lr()), global_step=step
+                    )
 
             if verbose >= 2:
                 print(
@@ -55,6 +69,12 @@ def train(
         if scheduler:
             if scheduler.step_frequency == "batch":
                 scheduler.step()
+
+        if profile:
+            prof.step()
+        
+    if profile:
+        prof.stop()
 
     acc = 100.0 * correct / len(train_loader.dataset)
     if verbose >= 1:

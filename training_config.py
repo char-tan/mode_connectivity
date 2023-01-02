@@ -56,5 +56,5 @@ VGG_CIFAR10_DEFAULT = TrainingConfig(
     weight_decay=5e-4,
     epochs=50,
     opt="sgd",
-    lr_scheduler="cosine"
+    lr_scheduler="warmup_cosine"
 )

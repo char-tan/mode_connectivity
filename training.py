@@ -55,6 +55,15 @@ def setup_train(
             optimizer, training_config.epochs
         )
         scheduler.step_frequency = "epoch"
+    elif training_config.lr_scheduler == "warmup_cosine":
+        scheduler = torch.optim.lr_scheduler.OneCycleLR(
+            optimizer,
+            max_lr=training_config.lr,
+            epochs=training_config.epochs,
+            steps_per_epoch=len(train_loader),
+            pct_start=5.0 / training_config.epochs,
+        )
+        scheduler.step_frequency = "batch"
     elif training_config.lr_scheduler:
         scheduler = scheduler(optimizer)
         if not hasattr(scheduler, "step_frequency"):
@@ -85,6 +94,7 @@ def train_model(
     log_interval,
     verbose: int = 2,
     tensorboard=False,
+    profile=False,
 ):
 
     # Need to do this because the train function takes an ArgumentParser object
@@ -119,6 +129,7 @@ def train_model(
             scheduler=scheduler,
             writer=writer,
             verbose=verbose,
+            profile=profile,
         )
         test_loss, test_acc = test(model, device, test_loader, verbose=verbose)
         if writer:
