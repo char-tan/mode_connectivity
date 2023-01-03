@@ -108,7 +108,6 @@ class ResNet(nn.Module):
         x = F.avg_pool2d(x, kernel_size=8, stride=8)
         x = x.view(x.size(0), -1)
         x = self.linear(x)
-        x = F.softmax(x)
 
         return x
 

@@ -1,5 +1,7 @@
+import torch
+
 from dataclasses import dataclass
-from typing import List, Optional, Callable, Dict
+from typing import List, Optional, Callable, Dict, Union
 
 from .models.mlp import MLP
 from .models.resnet import ResNet
@@ -16,7 +18,7 @@ class TrainingConfig:
     seed: int = 1
     opt: str = "adam"
     model_kwargs: Optional[Dict] = None
-    lr_scheduler: Optional[str] = None
+    lr_scheduler: Optional[Union[str, Callable]] = None
     log_interval: int = 10
     weight_decay: Optional[float] = None
     momentum: Optional[float] = 0.9
@@ -49,7 +51,10 @@ RESNET_CIFAR10_DEFAULT = TrainingConfig(
 VGG_CIFAR10_DEFAULT = TrainingConfig(
     model_factory=VGG,
     dataset="cifar10",
-    batch_size=512,
-    lr=0.001,
+    batch_size=128,
+    lr=0.1,
+    weight_decay=5e-4,
     epochs=50,
+    opt="sgd",
+    lr_scheduler="cosine"
 )

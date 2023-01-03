@@ -74,13 +74,16 @@ def plot_interp_acc(
         test_acc_interp_clever,
     )
 
-def plot_metric_contour(metric_name, t1s, t2s, metric_grid, model_vectors_dict: Dict[str, Tuple]):
+def plot_metric_contour(metric_name, t1s, t2s, metric_grid, model_vectors_dict: Dict[str, Tuple], **plot_kwargs):
     "Generate a contour plot of the loss landscape, along with points at x,y coordinates corresponding to models in model_vectors."
     fig = plt.figure(figsize = (6,5),dpi=100)
     fig.patch.set_facecolor('white')
     plt.title(f"{metric_name.title()} weight space cut")
 
-    plt.contourf(t1s,t2s,metric_grid.T,cmap=plt.cm.viridis, levels=40)
+    default_plot_kwargs = dict(cmap=plt.cm.viridis, levels=40)
+    default_plot_kwargs.update(plot_kwargs)
+
+    plt.contourf(t1s,t2s,metric_grid.T, **default_plot_kwargs)
     plt.colorbar()
 
     for ((model_name, (x, y)), marker) in zip(model_vectors_dict.items(), markers.MarkerStyle.markers.keys()):

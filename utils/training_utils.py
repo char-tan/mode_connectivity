@@ -3,7 +3,7 @@ import torch
 
 
 def train(
-    args, model, device, train_loader, optimizer, epoch, softmax=False, verbose: int = 2
+    args, model, device, train_loader, optimizer, epoch, verbose: int = 2
 ):
     model.train()
     correct = 0
@@ -11,9 +11,7 @@ def train(
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
-        if softmax:
-            output = F.log_softmax(output, dim=1)
-        loss = F.nll_loss(output, target)
+        loss = F.cross_entropy(output, target)
         pred = output.argmax(
             dim=1, keepdim=True
         )  # get the index of the max log-probability
@@ -37,7 +35,7 @@ def train(
         print("Train Epoch: {}, Train Accuracy: ({:.0f}%) ".format(epoch, acc))
 
 
-def test(model, device, test_loader, softmax=False, verbose: int = 2):
+def test(model, device, test_loader, verbose: int = 2):
     model.eval()
     test_loss = 0
     correct = 0
@@ -45,11 +43,7 @@ def test(model, device, test_loader, softmax=False, verbose: int = 2):
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             output = model(data)
-            if softmax:
-                output = F.log_softmax(output, dim=1)
-            test_loss += F.nll_loss(
-                output, target, reduction="sum"
-            ).item()  # sum up batch loss
+            test_loss += F.cross_entropy(output, target, reduction="sum").item()
             pred = output.argmax(
                 dim=1, keepdim=True
             )  # get the index of the max log-probability

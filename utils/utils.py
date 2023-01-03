@@ -65,7 +65,7 @@ def reconstruct(vector, example_state_dict):
 def state_dict_to_numpy_array(model_params):
   """Flatten the state_dict of a model into a numpy array (vector) of weights."""
   keys = model_params.keys()
-  v = np.concatenate([model_params[key].reshape([-1]) for key in keys],axis=0)
+  v = np.concatenate([model_params[key].reshape([-1]).cpu() for key in keys],axis=0)
   return v
 
 def generate_orthogonal_basis(v1, v2, v3):
@@ -100,8 +100,9 @@ def generate_loss_landscape_contour(model, device, train_loader, test_loader, pl
       model.load_state_dict(reconstructed_flat)
 
       model.eval()
-      test_loss, test_acc = test(model.to(device), device, test_loader, verbose=0)
-      train_loss, train_acc = test(model.to(device), device, train_loader, verbose=0)
+      with torch.no_grad():
+        test_loss, test_acc = test(model.to(device), device, test_loader, verbose=0)
+        train_loss, train_acc = test(model.to(device), device, train_loader, verbose=0)
       
       test_acc_grid[i1,i2] = test_acc
       test_loss_grid[i1,i2] = test_loss
