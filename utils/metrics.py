@@ -20,6 +20,23 @@ def JSD_loss(model_a, model_b, batch_imgs):
     # note that f.kl_div takes log-probs
     return (kl_div(logP, M) + kl_div(logQ, M)) / 2
 
+def fisher_info_matrix(model, data):
+    # have yet to check the correctness of this implementation
+    logP = model(data).log_softmax(-1)
+
+    fim = []
+    for x in range(logP.shape[0]):
+        for y in range(logP.shape[1]):
+            logP[x,y].backward()
+            param_grads_xy = torch.cat([
+                param.grad.flatten()
+                for name, param in model_a.named_parameters()
+            ])
+            grad_matrix_xy = torch.mm(torch.reshape(param_grads_xy, [param_grads_xy.shape[0], 1]), ), torch.reshape(param_grads_xy, [1, param_grads_xy.shape[0]])
+            fim += grad_matrix_xy * logP.softmax(-1)[x,y] / logP.shape[0]
+    return fim
+
+
 
 # TESTING BELOW:
 # %%
