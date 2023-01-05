@@ -4,7 +4,8 @@ import torch.nn.functional as f
 
 def kl_div(logP, M):
     # kl_div over probability distributions
-    return f.kl_div(logP.log_softmax(-1), M, reduction="none").sum(dim=-1).mean()
+    # note: f.kl_div(logP, Q) = D_kl(P||Q) (the inputs are swapped), so we swap them below
+    return f.kl_div(M, logP.log_softmax(-1), reduction="none").sum(dim=-1).mean()
 
 def KL_loss(model_a, model_b, batch_imgs):
     logP = model_a(batch_imgs)
