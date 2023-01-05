@@ -6,6 +6,11 @@ def kl_div(logP, M):
     # kl_div over probability distributions
     return f.kl_div(logP, M, reduction="none").sum(dim=-1)
 
+def KL_loss(model_a, model_b, batch_imgs):
+    logP = model_a(batch_imgs)
+    logQ = model_b(batch_imgs)
+    return f.kl_div(logP, logQ, reduction="none", log_target=True)
+
 def JSD_loss(model_a, model_b, batch_imgs):
     logP = model_a(batch_imgs)
     logQ = model_b(batch_imgs)
@@ -15,7 +20,7 @@ def JSD_loss(model_a, model_b, batch_imgs):
     return (kl_div(logP, M) + kl_div(logQ, M)) / 2
 
 
-
+# TESTING BELOW:
 # %%
 import sys, os
 SCRIPT_DIR = os.path.dirname(os.path.abspath('.'))
