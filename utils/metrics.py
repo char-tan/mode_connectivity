@@ -4,18 +4,18 @@ import torch.nn.functional as f
 
 def kl_div(logP, M):
     # kl_div over probability distributions
-    return f.kl_div(logP, M, reduction="none").sum(dim=-1)
+    return f.kl_div(logP.log_softmax(-1), M, reduction="none").sum(dim=-1).mean()
 
 def KL_loss(model_a, model_b, batch_imgs):
     logP = model_a(batch_imgs)
     logQ = model_b(batch_imgs)
-    return f.kl_div(logP, logQ, reduction="none", log_target=True)
+    return f.kl_div(logP.log_softmax(-1), logQ.log_softmax(-1), reduction="none", log_target=True)
 
 def JSD_loss(model_a, model_b, batch_imgs):
     logP = model_a(batch_imgs)
     logQ = model_b(batch_imgs)
-    print(logP - logQ)
-    M = (f.softmax(logP ,dim=-1)+f.softmax(logQ, dim=-1)) / 2
+    # print(logP - logQ)
+    M = (logP.softmax(-1)+logQ.softmax(-1)) / 2
     # note that f.kl_div takes log-probs
     return (kl_div(logP, M) + kl_div(logQ, M)) / 2
 
