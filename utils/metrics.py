@@ -53,7 +53,6 @@ if __name__ == "__main__":
         model.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
         return model
 
-
     print(os.getcwd())
 
     model_a = load_model(MLP, '../model_files/model_a.pt')

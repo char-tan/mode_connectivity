@@ -1,8 +1,9 @@
 # %%
 from utils.metrics import JSD_loss
-from utils.utils import lerp
-# ^ THIS DOES NOT WORK AAAAAAA
+from utils.utils import lerp, load_model
+# ^ THIS DOES WORK AAAAAAA :)
 from random import randint
+import torch
 
 #%%
 def optimise_for_geodesic(
@@ -17,8 +18,8 @@ def optimise_for_geodesic(
         all_weights = [weights_a] + all_weights + [weights_b]
         # NB: theta_1 != theta_a, theta_n != theta_b
         iterations = 0
-        NOT_CONVERGED = False # TODO
-        while iterations < max_iterations and NOT_CONVERGED:
+        CONVERGED = False # TODO
+        while iterations < max_iterations and not CONVERGED:
             i = randint(1, n)
 
             model_before = model_class()
@@ -29,10 +30,17 @@ def optimise_for_geodesic(
             model.load_state_dict(all_weights[i])
             model_after.load_state_dict(all_weights[i+1])
 
-            loss = (loss_metric(model_before, model, data) + loss_metric(model, model_after, data)).sum() # average?
+            opt = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
+            loss = (loss_metric(model_before, model, data) + loss_metric(model, model_after, data))
+
+            opt.zero_grad()
             grad = loss.backward()
-            all_weights[i] = all_weights[i] - learning_rate * grad
+            opt.step()
+
+            all_weights[i] = model.state_dict()
+    
+            iterations += 1
 
             # ALSO: track distance moved
             # or change in L over entire path 
