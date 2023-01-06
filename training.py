@@ -37,6 +37,9 @@ def setup_train(
         additional_test_transforms,
     )
 
+    if not training_config.weight_decay:
+        training_config.weight_decay = 0
+
     if not training_config.model_kwargs:
         training_config.model_kwargs = {}
     model = training_config.model_factory(**training_config.model_kwargs).to(device)
