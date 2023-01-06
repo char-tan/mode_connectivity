@@ -4,10 +4,10 @@ from torchvision import transforms
 from typing import List, Optional, Callable, Dict
 from argparse import Namespace
 
-from .utils.data import get_data_loaders
-from .utils.training_utils import train, test
-from .utils.utils import get_device
-from .training_config import TrainingConfig
+from utils.data import get_data_loaders
+from utils.training_utils import train, test
+from utils.utils import get_device
+from training_config import TrainingConfig
 
 
 def setup_train(

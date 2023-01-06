@@ -1,13 +1,17 @@
+# %%
+import sys
+sys.path.insert(0, "..")
+
 import copy
 import numpy as np
 import torch
 from tqdm import tqdm
-from ..training import test
+from utils.training_utils import test
 from dataclasses import dataclass
 
 @dataclass
 class TwoDimensionalPlane:
-  """Defines a two dimensional plane in an n-dimensional space."""
+  """Def ines a two dimensional plane in an n-dimensional space."""
   b1: np.array
   b2: np.array
   scale: float
@@ -115,3 +119,4 @@ def projection(vector, plane:TwoDimensionalPlane):
   x = np.sum((vector - plane.origin_vector)*plane.b1)/plane.scale
   y = np.sum((vector - plane.origin_vector)*plane.b2)/plane.scale
   return x,y
+# %%

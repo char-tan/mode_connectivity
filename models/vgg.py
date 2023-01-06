@@ -1,6 +1,6 @@
 import torch.nn as nn
 
-from ..utils.weight_matching import permutation_spec_from_axes_to_perm
+from utils.weight_matching import permutation_spec_from_axes_to_perm
 
 
 class VGG(nn.Module):

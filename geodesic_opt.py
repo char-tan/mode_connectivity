@@ -1,10 +1,10 @@
 # %%
-# from .utils.metrics import JSD_loss
-# from .utils.utils import lerp
+from utils.metrics import JSD_loss
+from utils.utils import lerp
 # ^ THIS DOES NOT WORK AAAAAAA
 from random import randint
 
-
+#%%
 def optimise_for_geodesic(
     model_class, weights_a, weights_b, n, loss_metric, data,
     max_iterations = 99, learning_rate = 0.01
@@ -40,3 +40,5 @@ def optimise_for_geodesic(
 
         return all_weights
             
+
+# %%

@@ -40,43 +40,43 @@ def fisher_info_matrix(model, data):
 
 # TESTING BELOW:
 # %%
-import sys, os
-SCRIPT_DIR = os.path.dirname(os.path.abspath('.'))
-sys.path.append(os.path.dirname(SCRIPT_DIR))
-from mode_connectivity.models.mlp import MLP
-from data import get_data_loaders
-import matplotlib.pyplot as plt
+if __name__ == "__main__":
+    import sys
+    sys.path.insert(0, "..")
+    import os
+    from models.mlp import MLP
+    from utils.data import get_data_loaders
+    import matplotlib.pyplot as plt
 
-def load_model(model_class, path):
-    model = model_class()
-    model.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
-    return model
-    
-
-model_a = load_model(MLP, '../model_files/model_a.pt')
-model_b = load_model(MLP, '../model_files/model_b.pt')
-model_bp = load_model(MLP, '../model_files/permuted_model_b.pt')
+    def load_model(model_class, path):
+        model = model_class()
+        model.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
+        return model
 
 
+    print(os.getcwd())
 
-# %%
-#from mode_connectivity.utils.utils import get_device
-#device, device_kwargs = get_device()
-# device, device_kwargs = "cpu", {}
-# train_kwargs = {"batch_size": 13, "shuffle": True}
-# test_kwargs = {"batch_size": 13, "shuffle": False}
-import torchvision.datasets as datasets
-import torchvision.transforms as transforms
-from torch.utils.data import DataLoader
-
-trainset = datasets.MNIST(
-    root="./data", train=True, download=True,
-    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]))
-
-dl = DataLoader(trainset, 64)
-
-batch = next(enumerate(dl))
-idx, (batch_imgs, img_labels) = batch
+    model_a = load_model(MLP, '../model_files/model_a.pt')
+    model_b = load_model(MLP, '../model_files/model_b.pt')
+    model_bp = load_model(MLP, '../model_files/permuted_model_b.pt')
 
 
-# %%
+
+    # %%
+    #from mode_connectivity.utils.utils import get_device
+    #device, device_kwargs = get_device()
+    # device, device_kwargs = "cpu", {}
+    # train_kwargs = {"batch_size": 13, "shuffle": True}
+    # test_kwargs = {"batch_size": 13, "shuffle": False}
+    import torchvision.datasets as datasets
+    import torchvision.transforms as transforms
+    from torch.utils.data import DataLoader
+
+    trainset = datasets.MNIST(
+        root="./data", train=True, download=True,
+        transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]))
+
+    dl = DataLoader(trainset, 64)
+
+    batch = next(enumerate(dl))
+    idx, (batch_imgs, img_labels) = batch

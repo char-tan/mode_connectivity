@@ -1,11 +1,12 @@
+# %%
 import torch
 
 from dataclasses import dataclass
 from typing import List, Optional, Callable, Dict, Union
 
-from .models.mlp import MLP
-from .models.resnet import ResNet
-from .models.vgg import VGG
+from models.mlp import MLP
+from models.resnet import ResNet
+from models.vgg import VGG
 
 
 @dataclass
@@ -58,3 +59,5 @@ VGG_CIFAR10_DEFAULT = TrainingConfig(
     opt="sgd",
     lr_scheduler="cosine"
 )
+
+# %%
