@@ -50,3 +50,33 @@ def optimise_for_geodesic(
             
 
 # %%
+if __name__ == "__main__":
+    from models.mlp import MLP
+    from utils.metrics import JSD_loss
+
+    weights_a = torch.load("model_files/model_a.pt", map_location=torch.device('cpu'))
+    weights_b = torch.load("model_files/model_b.pt", map_location=torch.device('cpu'))
+    weights_bp = torch.load("model_files/permuted_model_b.pt", map_location=torch.device('cpu'))
+
+    import torchvision.datasets as datasets
+    import torchvision.transforms as transforms
+    from torch.utils.data import DataLoader
+
+    trainset = datasets.MNIST(
+        root="utils/data", train=True, download=True,
+        transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]))
+
+    dl = DataLoader(trainset, 64)
+
+    batch = next(enumerate(dl))
+    idx, (batch_imgs, img_labels) = batch
+
+    opt_weights = optimise_for_geodesic(
+        MLP, weights_a, weights_bp,
+        n = 10,
+        loss_metric = JSD_loss,
+        data = batch_imgs,
+        max_iterations = 99,
+        learning_rate = 0.01
+    )
+# %%
