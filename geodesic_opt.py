@@ -1,6 +1,6 @@
 # %%
 from utils.metrics import JSD_loss
-from utils.utils import lerp, load_model
+from utils.utils import lerp
 # ^ THIS DOES WORK AAAAAAA :)
 from random import randint
 import torch
