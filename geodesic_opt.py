@@ -95,7 +95,7 @@ if __name__ == "__main__":
         loss_metric = JSD_loss,
         data = batch_imgs,
         max_iterations = 99,
-        learning_rate = 0.2
+        learning_rate = 0.1
     )
 
     plt.plot(losses)
