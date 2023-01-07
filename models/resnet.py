@@ -42,7 +42,7 @@ class Block(nn.Module):
                 ])
 
         else:
-            self.shortcut = lambda x: x
+            self.shortcut = nn.Identity()
 
     def forward(self, x):
 
