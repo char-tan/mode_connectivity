@@ -64,7 +64,7 @@ def setup_train(
             max_lr=training_config.lr,
             epochs=training_config.epochs,
             steps_per_epoch=len(train_loader),
-            pct_start=2.0 / training_config.epochs,
+            pct_start=0.02,
         )
         scheduler.step_frequency = "batch"
     elif training_config.lr_scheduler:

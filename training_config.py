@@ -44,8 +44,11 @@ RESNET_CIFAR10_DEFAULT = TrainingConfig(
     model_factory=ResNet,
     dataset="cifar10",
     batch_size=100,
-    lr=0.001,
-    epochs=100,
+    lr=0.1,
+    epochs=250,
+    weight_decay=1e-4,
+    opt="sgd",
+    lr_scheduler="warmup_cosine"
 )
 
 VGG_CIFAR10_DEFAULT = TrainingConfig(
