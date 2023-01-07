@@ -25,11 +25,11 @@ class Block(nn.Module):
 
         # stride = stride
         self.conv1 = nn.Conv2d(in_chans, out_chans, kernel_size=3, stride=stride, padding=1, bias=False)
-        self.norm1 = nn.LayerNorm([out_chans, spatial_dim, spatial_dim])
+        self.norm1 = nn.GroupNorm(num_groups=1, num_channels=out_chans)
 
         # stride = 1
         self.conv2 = nn.Conv2d(out_chans, out_chans, kernel_size=3, stride=1, padding=1, bias=False)
-        self.norm2 = nn.LayerNorm([out_chans, spatial_dim, spatial_dim])
+        self.norm2 = nn.GroupNorm(num_groups=1, num_channels=out_chans)
 
         # if stride == 2, need to halve spatial dims of input for skip connection
         if stride != 1:
@@ -38,7 +38,7 @@ class Block(nn.Module):
             # non-standard way of doing this, same as git-rebasin implementation
             self.shortcut = nn.Sequential(*[
                 nn.Conv2d(in_chans, out_chans, kernel_size=1, stride=2, padding=0, bias=False),
-                nn.LayerNorm([out_chans, spatial_dim, spatial_dim])
+                nn.GroupNorm(num_groups=1, num_channels=out_chans)
                 ])
 
         else:
@@ -80,7 +80,7 @@ class ResNet(nn.Module):
         wm = width_multiplier
 
         self.conv1 = nn.Conv2d(3, 16 * wm, kernel_size=3, padding=1, bias=False)
-        self.norm1 = nn.LayerNorm([16 * wm, 32, 32])
+        self.norm1 = nn.GroupNorm(num_groups=1, num_channels=16*wm)
 
         group_chans = [16 * wm, 32 * wm, 64 * wm]
         group_blocks = [3, 3, 3]  # for resnet20
