@@ -21,7 +21,7 @@ def JSD_loss(model_a, model_b, batch_imgs):
     return (kl_div(logP, M) + kl_div(logQ, M)) / 2
 
 def fisher_info_matrix(model, data):
-    # have yet to check the correctness of this implementation
+    # more or less pseudo code - have yet to check the correctness of this implementation
     logP = model(data).log_softmax(-1)
 
     fim = []

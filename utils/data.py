@@ -54,8 +54,8 @@ def get_data_loaders(
     if not additional_train_transforms:
         additional_train_transforms = []
 
-    train_transforms = transforms.Compose(additional_train_transforms + dataset_config.train_transforms)
-    test_transforms = transforms.Compose(additional_test_transforms + dataset_config.test_transforms)
+    train_transforms = transforms.Compose(dataset_config.train_transforms + additional_train_transforms) # changed so that you add additional train transforms after main configs
+    test_transforms = transforms.Compose(dataset_config.test_transforms + additional_test_transforms)
 
     trainset = dataset_config.dataset(
         root=root, train=True, download=True, transform=train_transforms
