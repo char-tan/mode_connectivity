@@ -48,7 +48,6 @@ class VGG(nn.Module):
                         in_channels, out_channels, kernel_size=3, padding=1, bias=False
                     ),
                     nn.GroupNorm(num_groups=1, num_channels=out_channels),
-                    #nn.LayerNorm([out_channels, spatial_dim, spatial_dim]),
                     nn.ReLU(),
                 ]
 
