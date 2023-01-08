@@ -4,15 +4,16 @@ from ..utils.weight_matching import permutation_spec_from_axes_to_perm
 
 
 class VGG(nn.Module):
-    def __init__(self):
+    def __init__(self, width_multiplier=1):
         super().__init__()
+        self.width_multiplier = width_multiplier
 
         conv_cfg = [
-            (64, 64),
-            (128, 128),
-            (256, 256, 256),
-            (512, 512, 512),
-            (512, 512, 512),
+            (64 * width_multiplier, 64 * width_multiplier),
+            (128 * width_multiplier, 128 * width_multiplier),
+            (256 * width_multiplier, 256 * width_multiplier, 256 * width_multiplier),
+            (512 * width_multiplier, 512 * width_multiplier, 512 * width_multiplier),
+            (512 * width_multiplier, 512 * width_multiplier, 512 * width_multiplier),
         ]
 
         classifier_cfg = {"input_dim": 512, "output_dim": 10, "width": 4096}
