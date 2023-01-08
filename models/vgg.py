@@ -16,7 +16,7 @@ class VGG(nn.Module):
             (512 * width_multiplier, 512 * width_multiplier, 512 * width_multiplier),
         ]
 
-        classifier_cfg = {"input_dim": 512, "output_dim": 10, "width": 4096}
+        classifier_cfg = {"input_dim": 512 * width_multiplier, "output_dim": 10, "width": 4096}
 
         self.features = self._make_conv(conv_cfg)
         self.classifier = self._make_classifier(**classifier_cfg)
