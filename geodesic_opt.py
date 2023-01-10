@@ -42,9 +42,13 @@ def optimise_for_geodesic(
             model = model_class()
             model_after = model_class()
 
-            model_before.load_state_dict(all_weights[i-1]).to(device)
-            model.load_state_dict(all_weights[i]).to(device)
-            model_after.load_state_dict(all_weights[i+1]).to(device)
+            model_before.load_state_dict(all_weights[i-1])
+            model.load_state_dict(all_weights[i])
+            model_after.load_state_dict(all_weights[i+1])
+
+            model_before.to(device)
+            model.to(device)
+            model_after.to(device)
 
             opt = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
