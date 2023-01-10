@@ -16,7 +16,10 @@ def metric_path_length(model_class, all_weights, loss_metric, data, device):
         model1.load_state_dict(all_weights[i+1])
         model0.to(device)
         model1.to(device)
-        length += loss_metric(model0, model1, data).detach().numpy()
+        if torch.cuda.is_available():
+            length += loss_metric(model0, model1, data).detach().cpu().numpy()
+        else:
+            length += loss_metric(model0, model1, data).detach().numpy()
     return length
 
 
