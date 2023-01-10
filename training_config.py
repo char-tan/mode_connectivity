@@ -43,9 +43,12 @@ MLP_MNIST_DEFAULT = TrainingConfig(
 RESNET_CIFAR10_DEFAULT = TrainingConfig(
     model_factory=ResNet,
     dataset="cifar10",
-    batch_size=100,
-    lr=0.001,
-    epochs=100,
+    batch_size=128,
+    lr=0.1,
+    epochs=250,
+    weight_decay=1e-4,
+    opt="sgd",
+    lr_scheduler="warmup_cosine"
 )
 
 VGG_CIFAR10_DEFAULT = TrainingConfig(
@@ -56,5 +59,5 @@ VGG_CIFAR10_DEFAULT = TrainingConfig(
     weight_decay=5e-4,
     epochs=50,
     opt="sgd",
-    lr_scheduler="cosine"
+    lr_scheduler="warmup_cosine"
 )

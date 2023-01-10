@@ -4,18 +4,19 @@ from ..utils.weight_matching import permutation_spec_from_axes_to_perm
 
 
 class VGG(nn.Module):
-    def __init__(self):
+    def __init__(self, width_multiplier=1):
         super().__init__()
+        self.width_multiplier = width_multiplier
 
         conv_cfg = [
-            (64, 64),
-            (128, 128),
-            (256, 256, 256),
-            (512, 512, 512),
-            (512, 512, 512),
+            (64 * width_multiplier, 64 * width_multiplier),
+            (128 * width_multiplier, 128 * width_multiplier),
+            (256 * width_multiplier, 256 * width_multiplier, 256 * width_multiplier),
+            (512 * width_multiplier, 512 * width_multiplier, 512 * width_multiplier),
+            (512 * width_multiplier, 512 * width_multiplier, 512 * width_multiplier),
         ]
 
-        classifier_cfg = {"input_dim": 512, "output_dim": 10, "width": 4096}
+        classifier_cfg = {"input_dim": 512 * width_multiplier, "output_dim": 10, "width": 4096}
 
         self.features = self._make_conv(conv_cfg)
         self.classifier = self._make_classifier(**classifier_cfg)
@@ -47,7 +48,7 @@ class VGG(nn.Module):
                     nn.Conv2d(
                         in_channels, out_channels, kernel_size=3, padding=1, bias=False
                     ),
-                    nn.LayerNorm([out_channels, spatial_dim, spatial_dim]),
+                    nn.GroupNorm(num_groups=1, num_channels=out_channels),
                     nn.ReLU(),
                 ]
 
