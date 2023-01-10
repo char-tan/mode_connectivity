@@ -2,11 +2,11 @@ import torch
 import copy
 from typing import Callable
 
-from .utils.data import get_data_loaders
-from .utils.utils import *
-from .utils.training_utils import test
-from .utils.weight_matching import *
-from .utils.plot import plot_interp_acc
+from utils.data import get_data_loaders
+from utils.utils import *
+from utils.training_utils import test
+from utils.weight_matching import *
+from utils.plot import plot_interp_acc
 
 
 def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points=25, verbose=2):

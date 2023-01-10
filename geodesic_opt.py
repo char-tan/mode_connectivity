@@ -2,10 +2,12 @@
 from random import randint
 import torch
 import copy
+import matplotlib.pyplot as plt
 
 from utils.metrics import JSD_loss
 from utils.utils import lerp, get_device
 from utils.training_utils import test
+from lmc import model_interpolation
 # ^ THIS DOES WORK AAAAAAA :)
 
 def metric_path_length(model_factory, all_weights, loss_metric, data, device):
@@ -60,6 +62,8 @@ def optimise_for_geodesic(
     losses = []
 
     device, device_kwargs = get_device()
+    
+    data_iterator = iter(dataloader)
 
     while iterations < max_iterations and not CONVERGED:
         i = randint(1, n)
@@ -78,7 +82,7 @@ def optimise_for_geodesic(
 
         opt = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
-        batch_images, batch_labels = next(iter(dataloader))
+        batch_images, batch_labels = next(data_iterator)
         batch_images = batch_images.to(device)
         loss = (loss_metric(model_before, model, batch_images) + loss_metric(model, model_after, batch_images))
 
@@ -143,7 +147,41 @@ def losses_over_geodesic(
         test_loss, test_acc = test(model.to(device), device, test_loader, verbose=0)
         test_acc_list.append(test_acc)
 
-    return train_acc_list, test_acc_list            
+    return train_acc_list, test_acc_list
+
+def compare_losses_over_geodesic(
+    model_factory, model_a, model_b, train_loader, test_loader, device, n_points=25,
+    loss_metric=JSD_loss, max_iterations=99, verbose = True
+):
+    if verbose:
+        print("Calculating LMC train accuracies ...")
+    lmc_train_accs, lmc_test_accs = model_interpolation(
+        model_a, model_b, train_loader, test_loader, device, n_points, verbose=0
+    )
+
+    if verbose:
+        print("Calculating geodesic train accuracies ...")
+    geodesic_train_accs, geodesic_test_accs = compare_losses_over_geodesic(
+        model_factory, model_a, model_b, train_loader, test_loader, device, n_points,
+        loss_metric, max_iterations=max_iterations
+    )
+
+    return ((lmc_train_accs, lmc_test_accs), (geodesic_train_accs, geodesic_test_accs))
+
+def plot_losses_over_geodesic(
+    model_factory, model_a, model_b, train_loader, test_loader, device, n_points=25,
+    loss_metric=JSD_loss, max_iterations=99
+):
+    ((lmc_train_accs, lmc_test_accs), (geodesic_train_accs, geodesic_test_accs)) = compare_losses_over_geodesic(
+        model_factory, model_a, model_b, train_loader, test_loader, device, n_points,
+        loss_metric, max_iterations
+    )
+    fig, ax = plt.subplot()
+    ax.plot(lmc_train_accs, label="LMC train acc.")
+    ax.plot(lmc_test_accs, label="LMC test acc.")
+    ax.plot(geodesic_train_accs, label="Geodesic train acc.")
+    ax.plot(geodesic_test_accs, label="Geodesic test acc.")
+    fig.show()
 
 # %%
 if __name__ == "__main__":
@@ -154,6 +192,7 @@ if __name__ == "__main__":
     import torchvision.transforms as transforms
     from torch.utils.data import DataLoader
     import matplotlib.pyplot as plt
+    from lmc import model_interpolation
 
     weights_a = torch.load("model_files/model_a.pt", map_location=torch.device('cpu'))
     weights_b = torch.load("model_files/model_b.pt", map_location=torch.device('cpu'))
@@ -171,7 +210,7 @@ if __name__ == "__main__":
     # %% (A cell for testing optimise_geodesic))
 
     opt_weights, losses = optimise_for_geodesic(
-        MLP, weights_a, weights_bp,
+        MLP, weights_a, weights_b,
         n = 10,
         loss_metric = JSD_loss,
         dataloader = dl,
@@ -193,6 +232,22 @@ if __name__ == "__main__":
     losses_along_path = losses_over_geodesic(
         MLP, model_a, model_b, train_loader, test_loader, device, n_points=25,
         loss_metric=JSD_loss, max_iterations=99
+    )
+
+    plt.plot(losses_along_path[0])
+    plt.plot(losses_along_path[1])
+
+    # %% (Cell for testing plot_losses_over_geodesic)
+    model_a, model_b = MLP(), MLP()
+    model_a.load_state_dict(weights_a)
+    model_b.load_state_dict(weights_bp)
+    train_loader, test_loader = get_data_loaders(
+        dataset="mnist", train_kwargs={"batch_size":512}, test_kwargs={"batch_size":512}
+    )
+    device, device_kwargs = get_device() # what are device_kwargs ???
+    plot_losses_over_geodesic(
+        MLP, model_a, model_b, train_loader, test_loader, device, n_points=10,
+        loss_metric=JSD_loss, max_iterations=10
     )
 
 # %%
