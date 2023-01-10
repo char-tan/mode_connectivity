@@ -1,6 +1,6 @@
 # %%
 from utils.metrics import JSD_loss
-from utils.utils import lerp
+from utils.utils import lerp, get_device
 # ^ THIS DOES WORK AAAAAAA :)
 from random import randint
 import torch
