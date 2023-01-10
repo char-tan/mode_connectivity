@@ -32,6 +32,9 @@ def optimise_for_geodesic(
         iterations = 0
         CONVERGED = False # TODO
         losses = []
+
+        device, device_kwargs = get_device()
+
         while iterations < max_iterations and not CONVERGED:
             i = randint(1, n)
 
@@ -39,9 +42,9 @@ def optimise_for_geodesic(
             model = model_class()
             model_after = model_class()
 
-            model_before.load_state_dict(all_weights[i-1])
-            model.load_state_dict(all_weights[i])
-            model_after.load_state_dict(all_weights[i+1])
+            model_before.load_state_dict(all_weights[i-1]).to(device)
+            model.load_state_dict(all_weights[i]).to(device)
+            model_after.load_state_dict(all_weights[i+1]).to(device)
 
             opt = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
