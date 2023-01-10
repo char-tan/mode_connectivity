@@ -8,12 +8,14 @@ import torch
 #%%
 
 
-def metric_path_length(model_class, all_weights, loss_metric, data):
+def metric_path_length(model_class, all_weights, loss_metric, data, device):
     length = 0
     for i in range(0, len(all_weights) - 1):
         model0, model1 = model_class(), model_class()
         model0.load_state_dict(all_weights[i])
         model1.load_state_dict(all_weights[i+1])
+        model0.to(device)
+        model1.to(device)
         length += loss_metric(model0, model1, data).detach().numpy()
     return length
 
@@ -62,7 +64,7 @@ def optimise_for_geodesic(
     
             iterations += 1
 
-            losses.append(metric_path_length(model_class, all_weights, loss_metric, data))
+            losses.append(metric_path_length(model_class, all_weights, loss_metric, data, device))
 
 
             # ALSO: track distance moved
