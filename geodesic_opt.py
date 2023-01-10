@@ -3,10 +3,12 @@ from random import randint
 import torch
 import copy
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 from utils.metrics import JSD_loss
 from utils.utils import lerp, get_device
 from utils.training_utils import test
+from utils.utils import load_checkpoint
 from lmc import model_interpolation
 # ^ THIS DOES WORK AAAAAAA :)
 
@@ -65,7 +67,8 @@ def optimise_for_geodesic(
     
     data_iterator = iter(dataloader)
 
-    while iterations < max_iterations and not CONVERGED:
+    print("Optimising geodesic ...")
+    for _ in tqdm(range(max_iterations)):
         i = randint(1, n)
 
         model_before = model_factory()
@@ -134,7 +137,8 @@ def losses_over_geodesic(
     train_acc_list = []
     test_acc_list = []
 
-    for i, weights in enumerate(geodesic_path_model_weights):
+    print("Calculating losses over geodesic:")
+    for weights in tqdm(geodesic_path_model_weights):
         model = model_factory()
         model.load_state_dict(weights)
 
@@ -156,7 +160,9 @@ def compare_losses_over_geodesic(
     if verbose:
         print("Calculating LMC train accuracies ...")
     lmc_train_accs, lmc_test_accs = model_interpolation(
-        model_a, model_b, train_loader, test_loader, device, n_points, verbose=0
+        model_a, model_b,
+        train_loader, test_loader,
+        device, n_points, verbose=0
     )
 
     if verbose:
@@ -181,6 +187,7 @@ def plot_losses_over_geodesic(
     ax.plot(lmc_test_accs, label="LMC test acc.")
     ax.plot(geodesic_train_accs, label="Geodesic train acc.")
     ax.plot(geodesic_test_accs, label="Geodesic test acc.")
+    ax.legend()
     fig.show()
 
 # %%
@@ -214,7 +221,7 @@ if __name__ == "__main__":
         n = 10,
         loss_metric = JSD_loss,
         dataloader = dl,
-        max_iterations = 99,
+        max_iterations = 10, # <-- THIS IS VERY LOW
         learning_rate = 0.1,
         return_losses=True
     )
@@ -222,11 +229,14 @@ if __name__ == "__main__":
     plt.plot(losses)
     
     # %% (A cell for testing model_geodesic_interpolation)
+    device, device_kwargs = get_device() # what are device_kwargs ???
     model_a, model_b = MLP(), MLP()
-    model_a.load_state_dict(weights_a)
-    model_b.load_state_dict(weights_bp)
+    load_checkpoint(model_a, "model_files/model_a.pt", device)
+    #model_a.load_state_dict(weights_a)
+    load_checkpoint(model_b, "model_files/permuted_model_b.pt", device)
+    #model_b.load_state_dict(weights_bp)
     train_loader, test_loader = get_data_loaders(
-        dataset="mnist", train_kwargs={"batch_size":512}, test_kwargs={"batch_size":512}
+        dataset="mnist", train_kwargs={"batch_size":4}, test_kwargs={"batch_size":4}
     )
     device, device_kwargs = get_device() # what are device_kwargs ???
     losses_along_path = losses_over_geodesic(
@@ -239,15 +249,20 @@ if __name__ == "__main__":
 
     # %% (Cell for testing plot_losses_over_geodesic)
     model_a, model_b = MLP(), MLP()
-    model_a.load_state_dict(weights_a)
-    model_b.load_state_dict(weights_bp)
+    load_checkpoint(model_a, "model_files/model_a.pt", device)
+    # model_a.load_state_dict(weights_a)
+    load_checkpoint(model_b, "model_files/permuted_model_b.pt", device)
+    # model_b.load_state_dict(weights_bp)
+    device, device_kwargs = get_device() # what are device_kwargs ???
+    model_a.to(device)
+    model_b.to(device)
     train_loader, test_loader = get_data_loaders(
-        dataset="mnist", train_kwargs={"batch_size":512}, test_kwargs={"batch_size":512}
+        dataset="mnist", train_kwargs={"batch_size":4}, test_kwargs={"batch_size":4}
     )
     device, device_kwargs = get_device() # what are device_kwargs ???
     plot_losses_over_geodesic(
         MLP, model_a, model_b, train_loader, test_loader, device, n_points=10,
-        loss_metric=JSD_loss, max_iterations=10
+        loss_metric=JSD_loss, max_iterations=4
     )
 
 # %%
