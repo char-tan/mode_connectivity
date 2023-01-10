@@ -69,7 +69,7 @@ def weight_matching(ps: PermutationSpec, params_a, params_b, max_iter=100, init_
             newL = torch.einsum('ij,ij->i', A, torch.eye(n)[ci, :]).sum()
 
             if verbose > 1:
-                print(f"iteration {iteration} {p}: loss? {newL - oldL}")
+                print(f"iteration {iteration} {p}: progress {newL - oldL}")
 
             progress = progress or newL > oldL + 1e-12
 

@@ -94,7 +94,6 @@ class VGG(nn.Module):
                     )
                     for i in range(len(is_conv))
                 },
-                **{f"features.{i}.bias": (f"P_Conv_{i}",) for i in is_conv + [0]},
                 # layer norms
                 **{
                     f"features.{is_norm[i]}.weight": (f"P_Conv_{is_conv[i]}", None)
@@ -106,9 +105,10 @@ class VGG(nn.Module):
                 },
                 # classifier
                 "classifier.0.weight": ("P_Dense_0", f"P_Conv_{is_conv[-1]}"),
+                "classifier.0.bias": ("P_Dense_2",),
                 "classifier.2.weight": (f"P_Dense_2", f"P_Dense_0"),
                 "classifier.2.bias": ("P_Dense_2",),
-                "classifier.4.weight": (None, "P_Dense_4"),
+                "classifier.4.weight": (None, "P_Dense_2"),
                 "classifier.4.bias": (None,),
             }
         )
