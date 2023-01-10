@@ -79,6 +79,7 @@ def optimise_for_geodesic(
         opt = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
         batch_images, batch_labels = next(iter(dataloader))
+        batch_images = batch_images.to(device)
         loss = (loss_metric(model_before, model, batch_images) + loss_metric(model, model_after, batch_images))
 
         opt.zero_grad()
