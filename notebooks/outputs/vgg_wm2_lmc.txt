@@ -1,0 +1,440 @@
+performing naive interpolation
+point 1/20. lam = 0.0, train loss = 0.038776390495300295, test loss = 0.32777718505859377
+point 2/20. lam = 0.05263157933950424, train loss = 0.047524069061279296, test loss = 0.2866862487792969
+point 3/20. lam = 0.10526315867900848, train loss = 0.07648929763793945, test loss = 0.2835232116699219
+point 4/20. lam = 0.15789473056793213, train loss = 0.15580221740722655, test loss = 0.3381482421875
+point 5/20. lam = 0.21052631735801697, train loss = 0.33710058776855467, test loss = 0.49267835693359374
+point 6/20. lam = 0.2631579041481018, train loss = 0.6901489221191406, test loss = 0.8101477661132812
+point 7/20. lam = 0.31578946113586426, train loss = 1.2565704418945312, test loss = 1.3245996826171875
+point 8/20. lam = 0.3684210479259491, train loss = 1.9030858032226563, test loss = 1.915583447265625
+point 9/20. lam = 0.42105263471603394, train loss = 2.302457316894531, test loss = 2.28614052734375
+point 10/20. lam = 0.4736842215061188, train loss = 2.403949365234375, test loss = 2.394667529296875
+point 11/20. lam = 0.5263158082962036, train loss = 2.397089455566406, test loss = 2.38915849609375
+point 12/20. lam = 0.5789473652839661, train loss = 2.3159403515625, test loss = 2.2949591796875
+point 13/20. lam = 0.6315789222717285, train loss = 1.9791209130859375, test loss = 1.949627880859375
+point 14/20. lam = 0.6842105388641357, train loss = 1.3497674194335938, test loss = 1.34957421875
+point 15/20. lam = 0.7368420958518982, train loss = 0.7516911645507812, test loss = 0.8182009155273438
+point 16/20. lam = 0.7894736528396606, train loss = 0.36655640625, test loss = 0.4943569091796875
+point 17/20. lam = 0.8421052694320679, train loss = 0.16845906494140625, test loss = 0.3394597839355469
+point 18/20. lam = 0.8947368264198303, train loss = 0.08303426528930664, test loss = 0.28401787109375
+point 19/20. lam = 0.9473684430122375, train loss = 0.05023429557800293, test loss = 0.283534619140625
+point 20/20. lam = 1.0, train loss = 0.03971503124237061, test loss = 0.3183131103515625
+
+permuting model
+iteration 0 P_Conv_17: progress 15.482526779174805
+iteration 0 P_Conv_3: progress 14.917938232421875
+iteration 0 P_Conv_37: progress 0.9111557006835938
+iteration 0 P_Conv_10: progress 20.555438995361328
+iteration 0 P_Conv_7: progress 23.73305892944336
+iteration 0 P_Conv_30: progress 1.1180899143218994
+iteration 0 P_Dense_0: progress 1.321529746055603
+iteration 0 P_Conv_14: progress 18.926403045654297
+iteration 0 P_Conv_24: progress 3.618610382080078
+iteration 0 P_Conv_20: progress 9.105783462524414
+iteration 0 P_Conv_40: progress 9.940235137939453
+iteration 0 P_Dense_2: progress 15.963855743408203
+iteration 0 P_Conv_27: progress 3.8716213703155518
+iteration 0 P_Conv_0: progress 40.31205368041992
+iteration 0 P_Conv_34: progress 4.18594217300415
+iteration 1 P_Conv_37: progress 1.8683786392211914
+iteration 1 P_Conv_30: progress 1.613304615020752
+iteration 1 P_Conv_7: progress 0.0
+iteration 1 P_Conv_24: progress 2.414584159851074
+iteration 1 P_Conv_27: progress 0.6879234313964844
+iteration 1 P_Conv_10: progress 6.62548828125
+iteration 1 P_Conv_40: progress 0.19498443603515625
+iteration 1 P_Conv_14: progress 11.845787048339844
+iteration 1 P_Conv_34: progress 0.49859046936035156
+iteration 1 P_Conv_17: progress 9.816627502441406
+iteration 1 P_Conv_20: progress 5.856731414794922
+iteration 1 P_Dense_0: progress 6.189968109130859
+iteration 1 P_Conv_0: progress 0.0
+iteration 1 P_Conv_3: progress 31.647048950195312
+iteration 1 P_Dense_2: progress 0.22326278686523438
+iteration 2 P_Conv_17: progress 1.8100662231445312
+iteration 2 P_Conv_3: progress 0.0
+iteration 2 P_Conv_0: progress 1.2369766235351562
+iteration 2 P_Conv_30: progress 0.4421548843383789
+iteration 2 P_Conv_37: progress 0.2687196731567383
+iteration 2 P_Conv_24: progress 3.3169260025024414
+iteration 2 P_Conv_40: progress 4.063264846801758
+iteration 2 P_Dense_0: progress 0.8235530853271484
+iteration 2 P_Dense_2: progress 0.0258941650390625
+iteration 2 P_Conv_7: progress 26.83234405517578
+iteration 2 P_Conv_34: progress 0.27820682525634766
+iteration 2 P_Conv_20: progress 1.641387939453125
+iteration 2 P_Conv_14: progress 4.5292816162109375
+iteration 2 P_Conv_27: progress 1.0826616287231445
+iteration 2 P_Conv_10: progress 16.261802673339844
+iteration 3 P_Conv_7: progress 0.9127426147460938
+iteration 3 P_Conv_34: progress 0.0
+iteration 3 P_Conv_27: progress 0.0
+iteration 3 P_Conv_0: progress 0.0
+iteration 3 P_Dense_2: progress 0.0
+iteration 3 P_Conv_10: progress 0.0194244384765625
+iteration 3 P_Conv_3: progress 0.34278106689453125
+iteration 3 P_Conv_37: progress 0.8155183792114258
+iteration 3 P_Dense_0: progress 0.0008563995361328125
+iteration 3 P_Conv_14: progress 2.5690841674804688
+iteration 3 P_Conv_30: progress 0.5037364959716797
+iteration 3 P_Conv_20: progress 0.0
+iteration 3 P_Conv_40: progress 0.39243507385253906
+iteration 3 P_Conv_17: progress 1.423431396484375
+iteration 3 P_Conv_24: progress 0.774871826171875
+iteration 4 P_Conv_3: progress 0.0
+iteration 4 P_Conv_0: progress 0.00250244140625
+iteration 4 P_Dense_2: progress 0.0005588531494140625
+iteration 4 P_Conv_7: progress 0.04290008544921875
+iteration 4 P_Conv_17: progress 0.0
+iteration 4 P_Dense_0: progress 0.03835105895996094
+iteration 4 P_Conv_30: progress 0.0
+iteration 4 P_Conv_27: progress 0.24241161346435547
+iteration 4 P_Conv_14: progress 0.08695220947265625
+iteration 4 P_Conv_20: progress 0.24410247802734375
+iteration 4 P_Conv_37: progress 0.05309772491455078
+iteration 4 P_Conv_10: progress 0.09075927734375
+iteration 4 P_Conv_24: progress 0.08730316162109375
+iteration 4 P_Conv_40: progress 0.016815185546875
+iteration 4 P_Conv_34: progress 0.5266141891479492
+iteration 5 P_Dense_0: progress 0.0033054351806640625
+iteration 5 P_Conv_3: progress 0.00022125244140625
+iteration 5 P_Conv_20: progress 0.00574493408203125
+iteration 5 P_Conv_10: progress 0.0
+iteration 5 P_Dense_2: progress 0.0053577423095703125
+iteration 5 P_Conv_24: progress 0.0055713653564453125
+iteration 5 P_Conv_0: progress 0.0
+iteration 5 P_Conv_7: progress 0.0068359375
+iteration 5 P_Conv_37: progress 0.08540058135986328
+iteration 5 P_Conv_14: progress 0.04706573486328125
+iteration 5 P_Conv_30: progress 0.27047157287597656
+iteration 5 P_Conv_17: progress 0.15883636474609375
+iteration 5 P_Conv_40: progress 0.0018672943115234375
+iteration 5 P_Conv_27: progress 0.05922508239746094
+iteration 5 P_Conv_34: progress 0.13299846649169922
+iteration 6 P_Conv_17: progress 0.0
+iteration 6 P_Conv_34: progress 0.0
+iteration 6 P_Conv_37: progress 0.01603984832763672
+iteration 6 P_Conv_14: progress 0.01849365234375
+iteration 6 P_Conv_30: progress 0.06424617767333984
+iteration 6 P_Conv_0: progress 0.0
+iteration 6 P_Dense_2: progress 0.0
+iteration 6 P_Conv_24: progress 0.0063571929931640625
+iteration 6 P_Conv_40: progress 0.000362396240234375
+iteration 6 P_Dense_0: progress 0.0008831024169921875
+iteration 6 P_Conv_27: progress 0.008503913879394531
+iteration 6 P_Conv_10: progress 0.0015869140625
+iteration 6 P_Conv_3: progress 0.0
+iteration 6 P_Conv_7: progress 0.0
+iteration 6 P_Conv_20: progress 0.058837890625
+iteration 7 P_Conv_30: progress 0.002162933349609375
+iteration 7 P_Conv_14: progress 0.0
+iteration 7 P_Conv_17: progress 0.026885986328125
+iteration 7 P_Conv_27: progress 0.00026702880859375
+iteration 7 P_Conv_37: progress 0.000156402587890625
+iteration 7 P_Conv_34: progress 0.02203369140625
+iteration 7 P_Dense_0: progress 0.0
+iteration 7 P_Conv_24: progress 0.02742767333984375
+iteration 7 P_Conv_20: progress 0.011463165283203125
+iteration 7 P_Conv_40: progress 0.0
+iteration 7 P_Conv_3: progress 0.0
+iteration 7 P_Dense_2: progress 0.000728607177734375
+iteration 7 P_Conv_10: progress 0.0
+iteration 7 P_Conv_0: progress 0.0
+iteration 7 P_Conv_7: progress 0.0
+iteration 8 P_Dense_0: progress 9.34600830078125e-05
+iteration 8 P_Conv_24: progress 0.0065479278564453125
+iteration 8 P_Conv_10: progress 0.0
+iteration 8 P_Conv_37: progress 0.0020580291748046875
+iteration 8 P_Conv_3: progress 0.0
+iteration 8 P_Conv_20: progress 0.000820159912109375
+iteration 8 P_Dense_2: progress 0.0001850128173828125
+iteration 8 P_Conv_30: progress 0.001678466796875
+iteration 8 P_Conv_0: progress 0.0
+iteration 8 P_Conv_14: progress 0.00370025634765625
+iteration 8 P_Conv_34: progress 0.00098419189453125
+iteration 8 P_Conv_27: progress 0.0034341812133789062
+iteration 8 P_Conv_17: progress 0.0140533447265625
+iteration 8 P_Conv_7: progress 0.0
+iteration 8 P_Conv_40: progress 5.53131103515625e-05
+iteration 9 P_Conv_40: progress 0.0
+iteration 9 P_Conv_30: progress 0.0007028579711914062
+iteration 9 P_Conv_24: progress 0.002166748046875
+iteration 9 P_Conv_34: progress 0.0001888275146484375
+iteration 9 P_Dense_0: progress 5.340576171875e-05
+iteration 9 P_Conv_17: progress 0.0
+iteration 9 P_Dense_2: progress 0.0001125335693359375
+iteration 9 P_Conv_14: progress 0.0040435791015625
+iteration 9 P_Conv_3: progress 0.0
+iteration 9 P_Conv_10: progress 0.0023193359375
+iteration 9 P_Conv_7: progress 0.00705718994140625
+iteration 9 P_Conv_20: progress 0.000324249267578125
+iteration 9 P_Conv_27: progress 0.00029277801513671875
+iteration 9 P_Conv_0: progress 0.0
+iteration 9 P_Conv_37: progress 0.0009708404541015625
+iteration 10 P_Conv_34: progress 0.0006914138793945312
+iteration 10 P_Conv_14: progress 0.001861572265625
+iteration 10 P_Conv_27: progress 0.0
+iteration 10 P_Conv_17: progress 0.02262115478515625
+iteration 10 P_Conv_3: progress 0.0
+iteration 10 P_Conv_40: progress 8.0108642578125e-05
+iteration 10 P_Conv_24: progress 0.0003147125244140625
+iteration 10 P_Conv_20: progress 0.003459930419921875
+iteration 10 P_Conv_0: progress 0.0
+iteration 10 P_Conv_30: progress 5.7220458984375e-05
+iteration 10 P_Conv_37: progress 0.0004329681396484375
+iteration 10 P_Conv_7: progress 0.0
+iteration 10 P_Dense_2: progress 0.0
+iteration 10 P_Conv_10: progress 0.0
+iteration 10 P_Dense_0: progress 0.0002288818359375
+iteration 11 P_Conv_10: progress 0.0
+iteration 11 P_Conv_17: progress 0.00102996826171875
+iteration 11 P_Conv_37: progress 0.0
+iteration 11 P_Conv_24: progress 0.00042724609375
+iteration 11 P_Conv_7: progress 0.0
+iteration 11 P_Conv_14: progress 0.0263671875
+iteration 11 P_Conv_0: progress 0.0
+iteration 11 P_Conv_30: progress 0.0
+iteration 11 P_Conv_34: progress 0.00011444091796875
+iteration 11 P_Conv_40: progress 1.9073486328125e-05
+iteration 11 P_Conv_3: progress 0.0
+iteration 11 P_Dense_0: progress 6.4849853515625e-05
+iteration 11 P_Conv_27: progress 0.0001354217529296875
+iteration 11 P_Conv_20: progress 0.00194549560546875
+iteration 11 P_Dense_2: progress 0.0002918243408203125
+iteration 12 P_Conv_17: progress 0.00286102294921875
+iteration 12 P_Conv_37: progress 2.288818359375e-05
+iteration 12 P_Conv_40: progress 1.9073486328125e-06
+iteration 12 P_Conv_20: progress 4.9591064453125e-05
+iteration 12 P_Conv_27: progress 0.0
+iteration 12 P_Conv_10: progress 0.000335693359375
+iteration 12 P_Conv_14: progress 0.00051116943359375
+iteration 12 P_Dense_0: progress 7.82012939453125e-05
+iteration 12 P_Conv_0: progress 0.0
+iteration 12 P_Conv_24: progress 0.006175994873046875
+iteration 12 P_Conv_3: progress 0.0
+iteration 12 P_Conv_30: progress 2.574920654296875e-05
+iteration 12 P_Conv_7: progress 0.0
+iteration 12 P_Dense_2: progress 9.918212890625e-05
+iteration 12 P_Conv_34: progress 5.7220458984375e-06
+iteration 13 P_Dense_2: progress 0.0
+iteration 13 P_Conv_37: progress 3.814697265625e-06
+iteration 13 P_Dense_0: progress 1.33514404296875e-05
+iteration 13 P_Conv_14: progress 0.0
+iteration 13 P_Conv_40: progress 0.0
+iteration 13 P_Conv_27: progress 0.0026979446411132812
+iteration 13 P_Conv_17: progress 0.0002593994140625
+iteration 13 P_Conv_30: progress 0.00047206878662109375
+iteration 13 P_Conv_24: progress 0.000957489013671875
+iteration 13 P_Conv_0: progress 0.0
+iteration 13 P_Conv_7: progress 0.0
+iteration 13 P_Conv_20: progress 0.001026153564453125
+iteration 13 P_Conv_10: progress 0.00023651123046875
+iteration 13 P_Conv_34: progress 7.152557373046875e-05
+iteration 13 P_Conv_3: progress 0.0
+iteration 14 P_Conv_3: progress 0.0
+iteration 14 P_Dense_2: progress 3.62396240234375e-05
+iteration 14 P_Conv_14: progress 0.0
+iteration 14 P_Conv_10: progress 0.0
+iteration 14 P_Conv_37: progress 1.33514404296875e-05
+iteration 14 P_Conv_30: progress 2.86102294921875e-06
+iteration 14 P_Conv_20: progress 0.0
+iteration 14 P_Conv_0: progress 0.0
+iteration 14 P_Conv_17: progress 0.00028228759765625
+iteration 14 P_Dense_0: progress 5.7220458984375e-06
+iteration 14 P_Conv_7: progress 0.0
+iteration 14 P_Conv_27: progress 0.0005903244018554688
+iteration 14 P_Conv_34: progress 3.814697265625e-06
+iteration 14 P_Conv_24: progress 0.0008716583251953125
+iteration 14 P_Conv_40: progress 0.0
+iteration 15 P_Dense_0: progress 0.0
+iteration 15 P_Conv_40: progress 0.0
+iteration 15 P_Conv_37: progress 9.5367431640625e-07
+iteration 15 P_Conv_17: progress 0.0
+iteration 15 P_Conv_3: progress 0.0
+iteration 15 P_Conv_7: progress 0.0
+iteration 15 P_Conv_34: progress 2.86102294921875e-06
+iteration 15 P_Conv_27: progress 0.00022602081298828125
+iteration 15 P_Conv_0: progress 0.0
+iteration 15 P_Conv_14: progress 3.0517578125e-05
+iteration 15 P_Conv_24: progress 0.00012969970703125
+iteration 15 P_Conv_30: progress 0.000244140625
+iteration 15 P_Conv_20: progress 0.000110626220703125
+iteration 15 P_Conv_10: progress 0.0
+iteration 15 P_Dense_2: progress 1.9073486328125e-05
+iteration 16 P_Conv_17: progress 0.0
+iteration 16 P_Conv_30: progress 0.0
+iteration 16 P_Conv_0: progress 0.0
+iteration 16 P_Conv_40: progress 0.0
+iteration 16 P_Conv_20: progress 0.0
+iteration 16 P_Dense_2: progress 0.0
+iteration 16 P_Conv_27: progress 0.0002079010009765625
+iteration 16 P_Conv_24: progress 8.58306884765625e-05
+iteration 16 P_Conv_37: progress -9.5367431640625e-07
+iteration 16 P_Conv_3: progress 0.0
+iteration 16 P_Conv_34: progress 3.147125244140625e-05
+iteration 16 P_Conv_10: progress 0.0
+iteration 16 P_Conv_14: progress 0.0
+iteration 16 P_Conv_7: progress 0.0
+iteration 16 P_Dense_0: progress 5.7220458984375e-06
+iteration 17 P_Conv_17: progress 0.0
+iteration 17 P_Conv_0: progress 0.0
+iteration 17 P_Dense_0: progress 0.0
+iteration 17 P_Conv_27: progress 0.0
+iteration 17 P_Conv_34: progress 0.0
+iteration 17 P_Conv_20: progress 0.0
+iteration 17 P_Conv_10: progress 0.0
+iteration 17 P_Conv_37: progress 7.62939453125e-06
+iteration 17 P_Conv_40: progress 0.0
+iteration 17 P_Conv_3: progress 0.0
+iteration 17 P_Conv_24: progress 0.0
+iteration 17 P_Conv_30: progress 6.866455078125e-05
+iteration 17 P_Dense_2: progress 3.24249267578125e-05
+iteration 17 P_Conv_7: progress 0.0
+iteration 17 P_Conv_14: progress 0.0
+iteration 18 P_Conv_7: progress 0.0
+iteration 18 P_Conv_27: progress 0.0
+iteration 18 P_Conv_40: progress 0.0
+iteration 18 P_Dense_0: progress 0.0
+iteration 18 P_Conv_24: progress 0.0
+iteration 18 P_Conv_14: progress 0.0
+iteration 18 P_Conv_17: progress 0.0
+iteration 18 P_Dense_2: progress 2.47955322265625e-05
+iteration 18 P_Conv_10: progress 0.0
+iteration 18 P_Conv_34: progress 1.33514404296875e-05
+iteration 18 P_Conv_0: progress 0.0
+iteration 18 P_Conv_3: progress 0.0
+iteration 18 P_Conv_37: progress 1.430511474609375e-05
+iteration 18 P_Conv_20: progress 0.0
+iteration 18 P_Conv_30: progress 1.9073486328125e-06
+iteration 19 P_Conv_40: progress 0.0
+iteration 19 P_Conv_27: progress 0.0
+iteration 19 P_Conv_30: progress 0.0
+iteration 19 P_Conv_37: progress 0.0
+iteration 19 P_Conv_17: progress 0.0
+iteration 19 P_Dense_0: progress 5.7220458984375e-06
+iteration 19 P_Conv_10: progress 0.0
+iteration 19 P_Dense_2: progress 1.9073486328125e-05
+iteration 19 P_Conv_20: progress 0.0
+iteration 19 P_Conv_0: progress 0.0
+iteration 19 P_Conv_34: progress 2.86102294921875e-06
+iteration 19 P_Conv_14: progress 0.0
+iteration 19 P_Conv_7: progress 0.0
+iteration 19 P_Conv_3: progress 0.0
+iteration 19 P_Conv_24: progress 0.0
+iteration 20 P_Conv_30: progress 0.0
+iteration 20 P_Conv_17: progress 0.0
+iteration 20 P_Conv_14: progress 0.0
+iteration 20 P_Conv_24: progress 0.0
+iteration 20 P_Conv_37: progress 1.9073486328125e-06
+iteration 20 P_Conv_3: progress 0.0
+iteration 20 P_Conv_27: progress 0.0
+iteration 20 P_Conv_10: progress 0.0
+iteration 20 P_Dense_2: progress 0.0
+iteration 20 P_Dense_0: progress 3.814697265625e-06
+iteration 20 P_Conv_7: progress 0.0
+iteration 20 P_Conv_0: progress 0.0
+iteration 20 P_Conv_40: progress 0.0
+iteration 20 P_Conv_34: progress 0.0
+iteration 20 P_Conv_20: progress 0.0
+iteration 21 P_Conv_14: progress 0.0
+iteration 21 P_Conv_3: progress 0.0
+iteration 21 P_Conv_10: progress 0.0
+iteration 21 P_Dense_0: progress 0.0
+iteration 21 P_Conv_40: progress 0.0
+iteration 21 P_Conv_7: progress 0.0
+iteration 21 P_Conv_30: progress 0.0
+iteration 21 P_Conv_24: progress 0.0
+iteration 21 P_Dense_2: progress 1.52587890625e-05
+iteration 21 P_Conv_20: progress 0.0
+iteration 21 P_Conv_34: progress 0.0
+iteration 21 P_Conv_17: progress 0.0
+iteration 21 P_Conv_27: progress 0.0
+iteration 21 P_Conv_37: progress 1.9073486328125e-06
+iteration 21 P_Conv_0: progress 0.0
+iteration 22 P_Conv_30: progress 0.0
+iteration 22 P_Conv_3: progress 0.0
+iteration 22 P_Conv_7: progress 0.0
+iteration 22 P_Conv_14: progress 0.0
+iteration 22 P_Conv_27: progress 0.0
+iteration 22 P_Conv_24: progress 0.0
+iteration 22 P_Conv_40: progress 0.0
+iteration 22 P_Conv_34: progress 9.5367431640625e-07
+iteration 22 P_Conv_17: progress 0.0
+iteration 22 P_Dense_2: progress 0.0
+iteration 22 P_Conv_0: progress 0.0
+iteration 22 P_Conv_20: progress 0.0
+iteration 22 P_Conv_37: progress 0.0
+iteration 22 P_Dense_0: progress 3.814697265625e-06
+iteration 22 P_Conv_10: progress 0.0
+iteration 23 P_Conv_34: progress 9.5367431640625e-07
+iteration 23 P_Dense_0: progress 0.0
+iteration 23 P_Conv_7: progress 0.0
+iteration 23 P_Conv_14: progress 0.0
+iteration 23 P_Conv_3: progress 0.0
+iteration 23 P_Conv_24: progress 0.0
+iteration 23 P_Conv_30: progress 0.0
+iteration 23 P_Conv_10: progress 0.0
+iteration 23 P_Conv_20: progress 0.0
+iteration 23 P_Dense_2: progress 9.5367431640625e-06
+iteration 23 P_Conv_37: progress -9.5367431640625e-07
+iteration 23 P_Conv_40: progress 0.0
+iteration 23 P_Conv_17: progress 0.0
+iteration 23 P_Conv_0: progress 0.0
+iteration 23 P_Conv_27: progress 0.0
+iteration 24 P_Dense_0: progress 0.0
+iteration 24 P_Conv_27: progress 0.0
+iteration 24 P_Conv_7: progress 0.0
+iteration 24 P_Conv_30: progress 0.0
+iteration 24 P_Conv_0: progress 0.0
+iteration 24 P_Conv_14: progress 0.0
+iteration 24 P_Conv_24: progress 0.0
+iteration 24 P_Conv_40: progress 0.0
+iteration 24 P_Conv_34: progress 0.0
+iteration 24 P_Conv_37: progress 0.0
+iteration 24 P_Conv_10: progress 0.0
+iteration 24 P_Conv_17: progress 0.0
+iteration 24 P_Conv_20: progress 0.0
+iteration 24 P_Conv_3: progress 0.0
+iteration 24 P_Dense_2: progress 9.5367431640625e-06
+iteration 25 P_Conv_7: progress 0.0
+iteration 25 P_Conv_17: progress 0.0
+iteration 25 P_Conv_40: progress 0.0
+iteration 25 P_Conv_0: progress 0.0
+iteration 25 P_Dense_2: progress 0.0
+iteration 25 P_Conv_24: progress 0.0
+iteration 25 P_Conv_34: progress 0.0
+iteration 25 P_Conv_37: progress 0.0
+iteration 25 P_Conv_30: progress 0.0
+iteration 25 P_Conv_14: progress 0.0
+iteration 25 P_Conv_20: progress 0.0
+iteration 25 P_Conv_27: progress 0.0
+iteration 25 P_Dense_0: progress 0.0
+iteration 25 P_Conv_10: progress 0.0
+iteration 25 P_Conv_3: progress 0.0
+
+performing permuted interpolation
+point 1/20. lam = 0.0, train loss = 0.03887291847229004, test loss = 0.32777718505859377
+point 2/20. lam = 0.05263157933950424, train loss = 0.04131952377319336, test loss = 0.3187632568359375
+point 3/20. lam = 0.10526315867900848, train loss = 0.04917915740966797, test loss = 0.31700067749023436
+point 4/20. lam = 0.15789473056793213, train loss = 0.060268664245605466, test loss = 0.32191923828125
+point 5/20. lam = 0.21052631735801697, train loss = 0.08005504898071289, test loss = 0.3332029296875
+point 6/20. lam = 0.2631579041481018, train loss = 0.1087205160522461, test loss = 0.34958402099609376
+point 7/20. lam = 0.31578946113586426, train loss = 0.14527202346801757, test loss = 0.370247998046875
+point 8/20. lam = 0.3684210479259491, train loss = 0.18567263122558594, test loss = 0.3954147094726562
+point 9/20. lam = 0.42105263471603394, train loss = 0.2284966485595703, test loss = 0.4208593811035156
+point 10/20. lam = 0.4736842215061188, train loss = 0.2564177456665039, test loss = 0.4397385498046875
+point 11/20. lam = 0.5263158082962036, train loss = 0.25999346954345703, test loss = 0.4445980773925781
+point 12/20. lam = 0.5789473652839661, train loss = 0.2359358743286133, test loss = 0.4325475219726562
+point 13/20. lam = 0.6315789222717285, train loss = 0.19909662139892578, test loss = 0.4072022583007813
+point 14/20. lam = 0.6842105388641357, train loss = 0.1573396337890625, test loss = 0.3779789245605469
+point 15/20. lam = 0.7368420958518982, train loss = 0.11745886749267578, test loss = 0.3508059814453125
+point 16/20. lam = 0.7894736528396606, train loss = 0.08435936737060547, test loss = 0.32831627807617186
+point 17/20. lam = 0.8421052694320679, train loss = 0.06411724472045899, test loss = 0.31382117919921876
+point 18/20. lam = 0.8947368264198303, train loss = 0.05325607925415039, test loss = 0.307911376953125
+point 19/20. lam = 0.9473684430122375, train loss = 0.04461056999206543, test loss = 0.309876318359375
+point 20/20. lam = 1.0, train loss = 0.04083751594543457, test loss = 0.31793929443359376
+[98.792, 98.628, 98.216, 96.896, 93.706, 86.128, 65.904, 25.264, 10.102, 10.0, 10.0, 10.008, 20.392, 61.976, 84.076, 92.932, 96.468, 98.05, 98.574, 98.75]
+[91.7, 91.41, 90.82, 89.53, 86.33, 79.66, 62.11, 26.2, 10.19, 10.0, 10.0, 10.01, 24.65, 61.97, 79.63, 86.67, 89.33, 90.52, 91.18, 91.46]
+[98.8, 98.686, 98.468, 98.08, 97.412, 96.442, 95.278, 93.934, 92.69, 91.86, 91.684, 92.39, 93.428, 94.862, 96.194, 97.286, 97.92, 98.324, 98.614, 98.682]
+[91.7, 91.52, 91.27, 90.88, 90.57, 90.16, 89.49, 88.45, 87.24, 86.44, 86.4, 86.75, 87.43, 88.46, 89.59, 90.4, 90.92, 91.17, 91.34, 91.46]
+
