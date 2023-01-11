@@ -1,0 +1,1 @@
+opt_weights_mlpab_fullmnist_maxiter1k_lr02.pt filter=lfs diff=lfs merge=lfs -text
