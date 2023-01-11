@@ -61,6 +61,7 @@ def permute_model(model_a, model_b, max_iter, verbose):
 
 def linear_mode_connect(
         model_factory: Callable,
+        model_kwargs: dict,
         model_path_a: str,
         model_path_b: str,
         dataset,
@@ -91,10 +92,10 @@ def linear_mode_connect(
     device, device_kwargs = get_device()
 
     # init models and load weights
-    model_a = model_factory()
+    model_a = model_factory(**model_kwargs)
     load_checkpoint(model_a, model_path_a, device)
 
-    model_b = model_factory()
+    model_b = model_factory(**model_kwargs)
     load_checkpoint(model_b, model_path_b, device)
 
     dataloader_kwargs = {'batch_size': batch_size}  # TODO can prob increase (no grads)
