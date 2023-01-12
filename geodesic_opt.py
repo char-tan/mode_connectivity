@@ -1,11 +1,11 @@
 # %%
-from random import randint
 import torch
 import copy
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 from utils.metrics import JSD_loss, squared_euclid_dist
+# from utils.objectives import heuristic_triplets_obj_function, full_params_obj_function
 from utils.utils import lerp, get_device
 from utils.training_utils import test
 from utils.utils import load_checkpoint
@@ -21,9 +21,8 @@ def metric_path_length(all_models, loss_metric, data):
         length += loss_metric(model0, model1, data)
     return length
 
-
 def optimise_for_geodesic(
-    model_factory, weights_a, weights_b, n, loss_metric, dataloader,
+    model_factory, weights_a, weights_b, n, loss_metric, objective_function, dataloader,
     max_iterations = 99, learning_rate = 0.01,
     return_losses = False,
     return_euclid_dist = False
@@ -70,20 +69,23 @@ def optimise_for_geodesic(
 
     losses = [] if return_losses else None
     euclid_dists = [] if return_euclid_dist else None
+    print('changed4!')
 
     print("Optimising geodesic ...")
     for _ in tqdm(range(max_iterations)):
-        i = randint(1, n)
+        # i = randint(1, n)
 
-        model_before= all_models[i-1]
-        model = all_models[i]
-        model_after = all_models[i+1]
+        # model_before= all_models[i-1]
+        # model = all_models[i]
+        # model_after = all_models[i+1]
 
-        opt = torch.optim.SGD(model.parameters(), lr=learning_rate)
+        # opt = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
-        batch_images, batch_labels = next(data_iterator)
-        batch_images = batch_images.to(device)
-        loss = (loss_metric(model_before, model, batch_images) + loss_metric(model, model_after, batch_images))
+        # batch_images, batch_labels = next(data_iterator)
+        # batch_images = batch_images.to(device)
+        # loss = (loss_metric(model_before, model, batch_images) + loss_metric(model, model_after, batch_images))
+
+        opt, loss, batch_images = objective_function(all_models, loss_metric, data_iterator, device, learning_rate, n)
 
         opt.zero_grad()
         grad = loss.backward()
