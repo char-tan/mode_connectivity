@@ -18,7 +18,7 @@ def metric_path_length(all_models, loss_metric, data):
     for i in range(0, len(all_models) - 1):
         model0, model1 = all_models[i], all_models[i+1]
         # length += loss_metric(model0, model1, data).detach().cpu().numpy()
-        length += loss_metric(model0, model1, data)
+        length += loss_metric(model0, model1, data).detach()
     return length
 
 def optimise_for_geodesic(

@@ -23,7 +23,8 @@ def JSD_loss(model_a, model_b, batch_imgs):
 def squared_euclid_dist(model_a, model_b, batch_imgs):
     a_params = model_a.state_dict()
     b_params = model_b.state_dict()
-    a_vect, b_vect = (state_dict_to_torch_tensor(p) for p in [a_params, b_params])
+    a_vect = state_dict_to_torch_tensor(a_params) 
+    b_vect = state_dict_to_torch_tensor(b_params)
     return ((a_vect - b_vect)**2).sum()
         
 
