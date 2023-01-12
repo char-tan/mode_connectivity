@@ -1,6 +1,7 @@
 # %%
 import torch
 import torch.nn.functional as f
+from utils.utils import state_dict_to_torch_tensor
 
 def kl_div(logP, M):
     # kl_div over probability distributions
@@ -15,26 +16,32 @@ def KL_loss(model_a, model_b, batch_imgs):
 def JSD_loss(model_a, model_b, batch_imgs):
     logP = model_a(batch_imgs)
     logQ = model_b(batch_imgs)
-    # print(logP - logQ)
     M = (logP.softmax(-1)+logQ.softmax(-1)) / 2
     # note that f.kl_div takes log-probs
     return (kl_div(logP, M) + kl_div(logQ, M)) / 2
 
-def fisher_info_matrix(model, data):
-    # more or less pseudo code - have yet to check the correctness of this implementation
-    logP = model(data).log_softmax(-1)
+def squared_euclid_dist(model_a, model_b, batch_imgs):
+    a_params = model_a.state_dict()
+    b_params = model_b.state_dict()
+    a_vect, b_vect = (state_dict_to_torch_tensor(p) for p in [a_params, b_params])
+    return ((a_vect - b_vect)**2).sum()
+        
 
-    fim = []
-    for x in range(logP.shape[0]):
-        for y in range(logP.shape[1]):
-            logP[x,y].backward()
-            param_grads_xy = torch.cat([
-                param.grad.flatten()
-                for name, param in model_a.named_parameters()
-            ])
-            grad_matrix_xy = torch.mm(torch.reshape(param_grads_xy, [param_grads_xy.shape[0], 1]), ), torch.reshape(param_grads_xy, [1, param_grads_xy.shape[0]])
-            fim += grad_matrix_xy * logP.softmax(-1)[x,y] / logP.shape[0]
-    return fim
+# def fisher_info_matrix(model, data):
+#     # more or less pseudo code - have yet to check the correctness of this implementation
+#     logP = model(data).log_softmax(-1)
+
+#     fim = []
+#     for x in range(logP.shape[0]):
+#         for y in range(logP.shape[1]):
+#             logP[x,y].backward()
+#             param_grads_xy = torch.cat([
+#                 param.grad.flatten()
+#                 for name, param in model_a.named_parameters()
+#             ])
+#             grad_matrix_xy = torch.mm(torch.reshape(param_grads_xy, [param_grads_xy.shape[0], 1]), ), torch.reshape(param_grads_xy, [1, param_grads_xy.shape[0]])
+#             fim += grad_matrix_xy * logP.softmax(-1)[x,y] / logP.shape[0]
+#     return fim
 
 
 

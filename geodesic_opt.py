@@ -5,7 +5,7 @@ import copy
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-from utils.metrics import JSD_loss
+from utils.metrics import JSD_loss, squared_euclid_dist
 from utils.utils import lerp, get_device
 from utils.training_utils import test
 from utils.utils import load_checkpoint
@@ -17,17 +17,16 @@ def metric_path_length(all_models, loss_metric, data):
     length = 0
     for i in range(0, len(all_models) - 1):
         model0, model1 = all_models[i], all_models[i+1]
-        if torch.cuda.is_available():
-            length += loss_metric(model0, model1, data).detach().cpu().numpy()
-        else:
-            length += loss_metric(model0, model1, data).detach().numpy()
+        # length += loss_metric(model0, model1, data).detach().cpu().numpy()
+        length += loss_metric(model0, model1, data)
     return length
 
 
 def optimise_for_geodesic(
     model_factory, weights_a, weights_b, n, loss_metric, dataloader,
     max_iterations = 99, learning_rate = 0.01,
-    return_losses = False
+    return_losses = False,
+    return_euclid_dist = False
 ):
     """
     Takes weights_a and weights_b of an instance of model_factory (an nn.Module
@@ -49,7 +48,7 @@ def optimise_for_geodesic(
     Note that calculating the losses at every optimisation step significantly slows down performance.
     """
     n -= 2
-    #^ Change from convention where n is number of middle points,
+    # Change from convention where n is number of middle points,
     #  to convention where n is the number of points including the
     #  end points (as used by model_interpolation) 
     device, device_kwargs = get_device()
@@ -68,7 +67,9 @@ def optimise_for_geodesic(
     
     iterations = 0
     CONVERGED = False # TODO
-    losses = []
+
+    losses = [] if return_losses else None
+    euclid_dists = [] if return_euclid_dist else None
 
     print("Optimising geodesic ...")
     for _ in tqdm(range(max_iterations)):
@@ -97,15 +98,19 @@ def optimise_for_geodesic(
             # because it only calculates the loss over
             # a single batch sample 
             losses.append(metric_path_length(all_models, loss_metric, batch_images))
+        if return_euclid_dist:
+            euclid_dists.append(metric_path_length(all_models, squared_euclid_dist, []))
 
 
         # ALSO: track distance moved
         # or change in L over entire path 
         # so we know if it's doing something
-    
-    if return_losses:
-        return all_weights, losses
-    return all_models
+    output = [all_models]
+
+    # if return_losses:
+    #     return all_weights, losses
+    # return all_models
+    return all_models, losses, euclid_dists
 
 def losses_over_geodesic(
     model_factory, model_a, model_b, train_loader, test_loader, device, n_points=25,
