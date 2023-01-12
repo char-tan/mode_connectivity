@@ -12,15 +12,11 @@ from utils.utils import load_checkpoint
 from lmc import model_interpolation
 # ^ THIS DOES WORK AAAAAAA :)
 
-def metric_path_length(model_factory, all_weights, loss_metric, data, device):
+def metric_path_length(all_models, loss_metric, data):
     # data is a single batch
     length = 0
-    for i in range(0, len(all_weights) - 1):
-        model0, model1 = model_factory(), model_factory()
-        model0.load_state_dict(all_weights[i])
-        model1.load_state_dict(all_weights[i+1])
-        model0.to(device)
-        model1.to(device)
+    for i in range(0, len(all_models) - 1):
+        model0, model1 = all_models[i], all_models[i+1]
         if torch.cuda.is_available():
             length += loss_metric(model0, model1, data).detach().cpu().numpy()
         else:
@@ -36,7 +32,7 @@ def optimise_for_geodesic(
     """
     Takes weights_a and weights_b of an instance of model_factory (an nn.Module
     that can be initialised without needing to pass in any args), a number of
-    middle points n, a loss_metric (e.g. JSD_loss), a data loader,
+    points n, a loss_metric (e.g. JSD_loss), a data loader,
     a maximum number of optimisation steps max_iterations to run for,
     a learning rate, and whether or not to return "losses", where in this case
     "loss" refers to the total length of the path from weights_a to weights_b
@@ -48,40 +44,39 @@ def optimise_for_geodesic(
 
     If return_losses=True, returns a tuple (list of weights, losses over training steps.)
     Otherwise, returns just the list of weights (a list where the first entry is weights_a,
-    the last weights_b, and there are n other weights between (i.e. total n+2), where
+    the last weights_b, and there are n-2 other weights between, where
     the weights are of the same form as returned by doing .state_dict() on a PyTorch model.)
     Note that calculating the losses at every optimisation step significantly slows down performance.
     """
+    n -= 2
+    #^ Change from convention where n is number of middle points,
+    #  to convention where n is the number of points including the
+    #  end points (as used by model_interpolation) 
+    device, device_kwargs = get_device()
+    
+    data_iterator = iter(dataloader)
+
     all_weights = [
         lerp(i / (n + 1), weights_a, weights_b)
         for i in range(1, n + 1)
     ]
-    # ^ weights we are optimising, i.e. not first or last
     all_weights = [weights_a] + all_weights + [weights_b]
-    # NB: theta_1 != theta_a, theta_n != theta_b
+    all_models = [model_factory() for i in range(0, n+2)]
+    for i, model in enumerate(all_models):
+        model.load_state_dict(all_weights[i])
+        model.to(device)
+    
     iterations = 0
     CONVERGED = False # TODO
     losses = []
-
-    device, device_kwargs = get_device()
-    
-    data_iterator = iter(dataloader)
 
     print("Optimising geodesic ...")
     for _ in tqdm(range(max_iterations)):
         i = randint(1, n)
 
-        model_before = model_factory()
-        model = model_factory()
-        model_after = model_factory()
-
-        model_before.load_state_dict(all_weights[i-1])
-        model.load_state_dict(all_weights[i])
-        model_after.load_state_dict(all_weights[i+1])
-
-        model_before.to(device)
-        model.to(device)
-        model_after.to(device)
+        model_before= all_models[i-1]
+        model = all_models[i]
+        model_after = all_models[i+1]
 
         opt = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
@@ -98,7 +93,10 @@ def optimise_for_geodesic(
         iterations += 1
 
         if return_losses:
-            losses.append(metric_path_length(model_factory, all_weights, loss_metric, batch_images, device))
+            # note that this is a noisy measure,
+            # because it only calculates the loss over
+            # a single batch sample 
+            losses.append(metric_path_length(all_models, loss_metric, batch_images))
 
 
         # ALSO: track distance moved
@@ -107,28 +105,32 @@ def optimise_for_geodesic(
     
     if return_losses:
         return all_weights, losses
-    return all_weights
+    return all_models
 
 def losses_over_geodesic(
     model_factory, model_a, model_b, train_loader, test_loader, device, n_points=25,
-    loss_metric=JSD_loss, max_iterations=99
+    verbose=False,
+    loss_metric=JSD_loss, max_iterations=99,
+    max_test_items=1024
 ):
     """
-    Takes models (often probably these will be models that have been LMC connected),
-    data loaders, a device, a number of points, a loss metric.
+    Takes models (often probably these will be models that have been
+    LMC connected), data loaders, a device, a number of points, a loss
+    metric.
 
-    Optimises the geodesic path between the two models, based on loss_metric, and for
-    a maximum max_iterations number of optimisation steps. (The optimisation is based
-    on the TRAINING DATA.)
+    Optimises the geodesic path between the two models, based on loss_metric,
+    and for a maximum max_iterations number of optimisation steps. (The
+    optimisation is based on the TRAINING DATA.)
 
-    Returns the test and train losses over the optimised geodesic path. These can be compared
-    to e.g. the test and train losses over the un-optimised pure LMC path.
+    Returns the test and train losses over the optimised geodesic path.
+    These can be compared to e.g. the test and train losses over the
+    un-optimised pure LMC path.
     """
     # deepcopy to not change model outside function
     model_a_weights = copy.deepcopy(model_a.state_dict())
     model_b_weights = copy.deepcopy(model_b.state_dict())
 
-    geodesic_path_model_weights = optimise_for_geodesic(
+    geodesic_path_models = optimise_for_geodesic(
         model_factory, model_a_weights, model_b_weights, n_points,
         loss_metric, train_loader, max_iterations=max_iterations,
         return_losses=False
@@ -138,51 +140,71 @@ def losses_over_geodesic(
     test_acc_list = []
 
     print("Calculating losses over geodesic:")
-    for weights in tqdm(geodesic_path_model_weights):
-        model = model_factory()
-        model.load_state_dict(weights)
-
+    for model in tqdm(geodesic_path_models):
         # evaluate on train set
 
-        train_loss, train_acc = test(model.to(device), device, train_loader, verbose=0)
+        train_loss, train_acc = test(
+            model.to(device), device, train_loader,
+            verbose=0, max_items=max_test_items
+        )
         train_acc_list.append(train_acc)
 
         # evaluate on test set
-        test_loss, test_acc = test(model.to(device), device, test_loader, verbose=0)
+        test_loss, test_acc = test(
+            model.to(device), device, test_loader,
+            verbose=0, max_items=max_test_items
+        )
         test_acc_list.append(test_acc)
+    
+    # print(train_acc_list)
+    # print(test_acc_list)
 
     return train_acc_list, test_acc_list
 
 def compare_losses_over_geodesic(
-    model_factory, model_a, model_b, train_loader, test_loader, device, n_points=25,
-    loss_metric=JSD_loss, max_iterations=99, verbose = True
+    model_factory, model_a, model_b,
+    train_loader, test_loader, device, n_points=25,
+    loss_metric=JSD_loss, max_iterations=99, verbose = True,
+    max_test_items = None
 ):
     if verbose:
         print("Calculating LMC train accuracies ...")
     lmc_train_accs, lmc_test_accs = model_interpolation(
         model_a, model_b,
         train_loader, test_loader,
-        device, n_points, verbose=0
+        device, n_points, verbose=0,
+        max_test_items=max_test_items
     )
 
     if verbose:
         print("Calculating geodesic train accuracies ...")
-    geodesic_train_accs, geodesic_test_accs = compare_losses_over_geodesic(
-        model_factory, model_a, model_b, train_loader, test_loader, device, n_points,
-        loss_metric, max_iterations=max_iterations
+    geodesic_train_accs, geodesic_test_accs = losses_over_geodesic(
+        model_factory, model_a, model_b,
+        train_loader, test_loader, device, n_points=n_points,
+        loss_metric=loss_metric, max_iterations=max_iterations,
+        verbose=verbose,
+        max_test_items=max_test_items
     )
 
     return ((lmc_train_accs, lmc_test_accs), (geodesic_train_accs, geodesic_test_accs))
 
 def plot_losses_over_geodesic(
-    model_factory, model_a, model_b, train_loader, test_loader, device, n_points=25,
-    loss_metric=JSD_loss, max_iterations=99
+    model_factory, model_a, model_b,
+    train_loader, test_loader, device,
+    n_points=25,
+    loss_metric=JSD_loss,
+    max_iterations=99,
+    max_test_items=None
 ):
     ((lmc_train_accs, lmc_test_accs), (geodesic_train_accs, geodesic_test_accs)) = compare_losses_over_geodesic(
-        model_factory, model_a, model_b, train_loader, test_loader, device, n_points,
-        loss_metric, max_iterations
+        model_factory, model_a, model_b,
+        train_loader, test_loader, device,
+        n_points,
+        loss_metric,
+        max_iterations,
+        max_test_items=max_test_items
     )
-    fig, ax = plt.subplot()
+    fig, ax = plt.subplots()
     ax.plot(lmc_train_accs, label="LMC train acc.")
     ax.plot(lmc_test_accs, label="LMC test acc.")
     ax.plot(geodesic_train_accs, label="Geodesic train acc.")
@@ -216,7 +238,7 @@ if __name__ == "__main__":
 
     # %% (A cell for testing optimise_geodesic))
 
-    opt_weights, losses = optimise_for_geodesic(
+    opt_models, losses = optimise_for_geodesic(
         MLP, weights_a, weights_b,
         n = 10,
         loss_metric = JSD_loss,
@@ -241,7 +263,8 @@ if __name__ == "__main__":
     device, device_kwargs = get_device() # what are device_kwargs ???
     losses_along_path = losses_over_geodesic(
         MLP, model_a, model_b, train_loader, test_loader, device, n_points=25,
-        loss_metric=JSD_loss, max_iterations=99
+        loss_metric=JSD_loss, max_iterations=99,
+        max_test_items=1024
     )
 
     plt.plot(losses_along_path[0])
@@ -261,8 +284,9 @@ if __name__ == "__main__":
     )
     device, device_kwargs = get_device() # what are device_kwargs ???
     plot_losses_over_geodesic(
-        MLP, model_a, model_b, train_loader, test_loader, device, n_points=10,
-        loss_metric=JSD_loss, max_iterations=4
+        MLP, model_a, model_b, train_loader, test_loader, device, n_points=25,
+        loss_metric=JSD_loss, max_iterations=4,
+        max_test_items=1024
     )
 
 # %%
