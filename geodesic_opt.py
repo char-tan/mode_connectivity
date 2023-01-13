@@ -18,10 +18,9 @@ def metric_path_length(all_models, loss_metric, data, track_grad = False):
     n = len(all_models)
 
     if track_grad:
-        length = [loss_metric(all_models[i], all_models[i+1], data) for i in range(n-1)].sum()
+        length = torch.sum(torch.stack([loss_metric(all_models[i], all_models[i+1], data) for i in range(n-1)]))
     else:
-        length = [loss_metric(all_models[i], all_models[i+1], data).detach() for i in range(n-1)].sum().detach()
-
+        length = sum([loss_metric(all_models[i], all_models[i+1], data).detach() for i in range(n-1)]).detach()
     # for i in range(0, len(all_models) - 1):
     #     model0, model1 = all_models[i], all_models[i+1]
     #     # length += loss_metric(model0, model1, data).detach().cpu().numpy()
@@ -79,18 +78,6 @@ def optimise_for_geodesic(
 
     print("Optimising geodesic ...")
     for _ in tqdm(range(max_iterations)):
-        # i = randint(1, n)
-
-        # model_before= all_models[i-1]
-        # model = all_models[i]
-        # model_after = all_models[i+1]
-
-        # opt = torch.optim.SGD(model.parameters(), lr=learning_rate)
-
-        # batch_images, batch_labels = next(data_iterator)
-        # batch_images = batch_images.to(device)
-        # loss = (loss_metric(model_before, model, batch_images) + loss_metric(model, model_after, batch_images))
-
         opt, loss, batch_images, data_iterator = objective_function(all_models, loss_metric, data_iterator, dataloader, device, learning_rate, n)
 
         opt.zero_grad()

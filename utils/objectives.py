@@ -39,7 +39,7 @@ def full_params(all_models, loss_metric, data_iterator, data_loader, device, lea
 
     loss = metric_path_length(all_models, loss_metric, batch_images, track_grad = True)
 
-    return opt, loss, batch_images
+    return opt, loss, batch_images, data_iterator
 
     
     
