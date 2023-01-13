@@ -12,13 +12,20 @@ from utils.utils import load_checkpoint
 from lmc import model_interpolation
 # ^ THIS DOES WORK AAAAAAA :)
 
-def metric_path_length(all_models, loss_metric, data):
+def metric_path_length(all_models, loss_metric, data, track_grad = False):
     # data is a single batch
     length = 0
-    for i in range(0, len(all_models) - 1):
-        model0, model1 = all_models[i], all_models[i+1]
-        # length += loss_metric(model0, model1, data).detach().cpu().numpy()
-        length += loss_metric(model0, model1, data).detach()
+    n = len(all_models)
+
+    if track_grad:
+        length = [loss_metric(all_models[i], all_models[i+1], data) for i in range(n-1)].sum()
+    else:
+        length = [loss_metric(all_models[i], all_models[i+1], data).detach() for i in range(n-1)].sum().detach()
+
+    # for i in range(0, len(all_models) - 1):
+    #     model0, model1 = all_models[i], all_models[i+1]
+    #     # length += loss_metric(model0, model1, data).detach().cpu().numpy()
+    #     length += loss_metric(model0, model1, data).detach()
     return length
 
 def optimise_for_geodesic(
@@ -69,7 +76,6 @@ def optimise_for_geodesic(
 
     losses = [] if return_losses else None
     euclid_dists = [] if return_euclid_dist else None
-    print('changed4!')
 
     print("Optimising geodesic ...")
     for _ in tqdm(range(max_iterations)):
@@ -85,7 +91,7 @@ def optimise_for_geodesic(
         # batch_images = batch_images.to(device)
         # loss = (loss_metric(model_before, model, batch_images) + loss_metric(model, model_after, batch_images))
 
-        opt, loss, batch_images = objective_function(all_models, loss_metric, data_iterator, device, learning_rate, n)
+        opt, loss, batch_images, data_iterator = objective_function(all_models, loss_metric, data_iterator, dataloader, device, learning_rate, n)
 
         opt.zero_grad()
         grad = loss.backward()
