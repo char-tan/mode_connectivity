@@ -1,14 +1,14 @@
 # %%
 import torch
-import torch.nn.functional as f
+import torch.nn.functional as F
 
-def kl_div(logP, M):
-    # kl_div over probability distributions
-    # note: f.kl_div(logP, Q) = D_kl(Q||P) (the inputs are swapped), so we swap them below
-    return f.kl_div(torch.log(M), logP.softmax(-1), reduction="none").sum(dim=-1).mean()
+def JSD_loss(logits_P, logits_Q):
 
-def JSD_loss(input_a, input_b):
-    M = (input_a.softmax(-1)+input_b.softmax(-1)) / 2
-    # note that f.kl_div takes log-probs
-    return (kl_div(input_a, M) + kl_div(input_b, M)) / 2
+    P = torch.softmax(logits_P)
+    Q = torch.softmax(logits_Q)
 
+    M = (P + Q) / 2
+
+    logP, logQ, logM = torch.log(logP), torch.log(logQ), torch.log(logM)
+
+    return (F.kl_div(logM, logP) + F.kl_div(logM, logQ)) / 2
