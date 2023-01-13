@@ -12,100 +12,48 @@ from utils.utils import load_checkpoint
 from lmc import model_interpolation
 # ^ THIS DOES WORK AAAAAAA :)
 
-def metric_path_length(all_models, loss_metric, data, track_grad = False):
-    # data is a single batch
+def metric_path_length(outputs, loss_metric=JSD_loss):
     length = 0
-    n = len(all_models)
-
-    if track_grad:
-        length = torch.sum(torch.stack([loss_metric(all_models[i], all_models[i+1], data) for i in range(n-1)]))
-    else:
-        length = sum([loss_metric(all_models[i], all_models[i+1], data).detach() for i in range(n-1)]).detach()
-    # for i in range(0, len(all_models) - 1):
-    #     model0, model1 = all_models[i], all_models[i+1]
-    #     # length += loss_metric(model0, model1, data).detach().cpu().numpy()
-    #     length += loss_metric(model0, model1, data).detach()
+    for i in range(0, len(outputs) - 1):
+        length += loss_metric(outputs[i], outputs[i+1])
     return length
 
 def optimise_for_geodesic(
-    model_factory, weights_a, weights_b, n, loss_metric, objective_function, dataloader,
-    max_iterations = 99, learning_rate = 0.01,
+    super_model, dataloader, device,
+    learning_rate = 0.01,
     return_losses = False,
-    return_euclid_dist = False
+    return_euclid_dist = False,
+    epochs = 1
 ):
-    """
-    Takes weights_a and weights_b of an instance of model_factory (an nn.Module
-    that can be initialised without needing to pass in any args), a number of
-    points n, a loss_metric (e.g. JSD_loss), a data loader,
-    a maximum number of optimisation steps max_iterations to run for,
-    a learning rate, and whether or not to return "losses", where in this case
-    "loss" refers to the total length of the path from weights_a to weights_b
-    when using loss_metric on model predictions at points between the path.
-
-    Performs gradient descent with the weights at the intermediate points between
-    model_a and model_b as the parameters, and loss_metric as the loss function.
-    For performance 
-
-    If return_losses=True, returns a tuple (list of weights, losses over training steps.)
-    Otherwise, returns just the list of weights (a list where the first entry is weights_a,
-    the last weights_b, and there are n-2 other weights between, where
-    the weights are of the same form as returned by doing .state_dict() on a PyTorch model.)
-    Note that calculating the losses at every optimisation step significantly slows down performance.
-    """
-    n -= 2
-    # Change from convention where n is number of middle points,
-    #  to convention where n is the number of points including the
-    #  end points (as used by model_interpolation) 
-    device, device_kwargs = get_device()
-    
-    data_iterator = iter(dataloader)
-
-    all_weights = [
-        lerp(i / (n + 1), weights_a, weights_b)
-        for i in range(1, n + 1)
-    ]
-    all_weights = [weights_a] + all_weights + [weights_b]
-    all_models = [model_factory() for i in range(0, n+2)]
-    for i, model in enumerate(all_models):
-        model.load_state_dict(all_weights[i])
-        model.to(device)
-    
-    iterations = 0
-    CONVERGED = False # TODO
 
     losses = [] if return_losses else None
-    euclid_dists = [] if return_euclid_dist else None
+    sq_euc_dists = [] if return_euclid_dist else None
+
+    optimizer = torch.optim.SGD(super_model.parameters(), lr=learning_rate)
 
     print("Optimising geodesic ...")
-    for _ in tqdm(range(max_iterations)):
-        opt, loss, batch_images, data_iterator = objective_function(all_models, loss_metric, data_iterator, dataloader, device, learning_rate, n)
 
-        opt.zero_grad()
-        grad = loss.backward()
-        opt.step()
+    for epoch_idx in range(epochs):
 
-        all_weights[i] = model.state_dict()
+        for batch_idx, (data, target) in enumerate(dataloader):
 
-        iterations += 1
+            data, target = data.to(device), target.to(device)
+            optimizer.zero_grad()
+            outputs = super_model(data)
+      
+            loss = metric_path_length(outputs)
 
-        if return_losses:
-            # note that this is a noisy measure,
-            # because it only calculates the loss over
-            # a single batch sample 
-            losses.append(metric_path_length(all_models, loss_metric, batch_images))
-        if return_euclid_dist:
-            euclid_dists.append(metric_path_length(all_models, squared_euclid_dist, []))
+            sq_euc_dist = super_model.sq_euc_dist()
 
+            print(f'batch {batch_idx} | path loss {loss} | sq euc dist {sq_euc_dist}')
+    
+            loss.backward()
+            optimizer.step()
 
-        # ALSO: track distance moved
-        # or change in L over entire path 
-        # so we know if it's doing something
-    output = [all_models]
-
-    # if return_losses:
-    #     return all_weights, losses
-    # return all_models
-    return all_models, losses, euclid_dists
+            losses.append(loss)
+            sq_euc_dists.append(sq_euc_dist)
+            
+    return losses, sq_euc_dists
 
 def losses_over_geodesic(
     model_factory, model_a, model_b, train_loader, test_loader, device, n_points=25,
