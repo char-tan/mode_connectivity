@@ -103,13 +103,14 @@ def linear_mode_connect(
     model_b = model_factory()
     load_checkpoint(model_b, model_path_b, device)
     
+    dataloader_kwargs = {'batch_size': batch_size}
+
     train_loader, test_loader = get_data_loaders(dataset, dataloader_kwargs, dataloader_kwargs, eval_only=True)
 
     if verbose >= 1:
         print('\nperforming naive interpolation')
 
     # interpolate naively between models
-
     
     train_acc_naive, test_acc_naive = model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points=n_points, verbose=verbose)
 
