@@ -4,13 +4,14 @@ import copy
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-from utils.metrics import JSD_loss, squared_euclid_dist
-# from utils.objectives import heuristic_triplets_obj_function, full_params_obj_function
 from utils.utils import lerp, get_device
 from utils.training_utils import test
 from utils.utils import load_checkpoint
+from utils.metrics import JSD_loss
 from lmc import model_interpolation
 # ^ THIS DOES WORK AAAAAAA :)
+
+import torch.nn.functional as F
 
 def metric_path_length(outputs, loss_metric=JSD_loss):
     length = 0
@@ -18,22 +19,37 @@ def metric_path_length(outputs, loss_metric=JSD_loss):
         length += loss_metric(outputs[i], outputs[i+1])
     return length
 
+def acc_on_path(outputs, target, loss_function=F.cross_entropy):
+  
+    accs = []
+
+    # I DO THIS PER BATCH NOT CUMULATIVE AS IN TRAIN / TEST
+    for output in outputs:
+        pred = output.argmax(
+                dim=1, keepdim=True
+            )  # get the index of the max log-probability
+        correct = pred.eq(target.view_as(pred)).sum().item()
+        accs.append(correct / target.shape[0] * 100)
+
+    return torch.tensor(accs)
+
 def optimise_for_geodesic(
-    super_model, dataloader, device,
-    learning_rate = 0.01,
-    return_losses = False,
-    return_euclid_dist = False,
-    epochs = 1
+    super_model, dataloader,
+    lr = 0.01,
+    num_epochs = 1
 ):
 
-    losses = [] if return_losses else None
-    sq_euc_dists = [] if return_euclid_dist else None
+    device, _ = get_device()
 
-    optimizer = torch.optim.SGD(super_model.parameters(), lr=learning_rate)
+    path_lengths = []
+    sq_euc_dists = []
+    path_accs = []
+
+    optimizer = torch.optim.SGD(super_model.parameters(), lr=lr)
 
     print("Optimising geodesic ...")
 
-    for epoch_idx in range(epochs):
+    for epoch_idx in range(num_epochs):
 
         for batch_idx, (data, target) in enumerate(dataloader):
 
@@ -41,19 +57,24 @@ def optimise_for_geodesic(
             optimizer.zero_grad()
             outputs = super_model(data)
       
-            loss = metric_path_length(outputs)
+            path_length = metric_path_length(outputs)
 
             sq_euc_dist = super_model.sq_euc_dist()
 
-            print(f'batch {batch_idx} | path loss {loss} | sq euc dist {sq_euc_dist}')
+            path_acc = acc_on_path(outputs, target)
+
+            mean_path_acc = path_acc.mean()
+
+            print(f'batch {batch_idx} | path length {path_length} | sq euc dist {sq_euc_dist} | mean path acc {mean_path_acc}')
     
-            loss.backward()
+            path_length.backward()
             optimizer.step()
 
-            losses.append(loss)
+            path_lengths.append(path_length)
             sq_euc_dists.append(sq_euc_dist)
-            
-    return losses, sq_euc_dists
+            path_accs.append(path_acc)
+
+    return path_lengths, sq_euc_dists, path_accs
 
 def losses_over_geodesic(
     model_factory, model_a, model_b, train_loader, test_loader, device, n_points=25,
