@@ -23,20 +23,20 @@ def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_p
     train_acc_list = []
     test_acc_list = []
 
-    for i, lam in tqdm(list(enumerate(lambdas))):
+    for i, lam in enumerate(lambdas):
         # linear interpolate model state dicts and load model
         lerp_model = lerp(lam, model_a_dict, model_b_dict)
         model_b.load_state_dict(lerp_model)
 
         # evaluate on train set
         train_loss, train_acc = test(
-            model_b.to(device), device, train_loader, verbose=0, max_items=max_test_items
+            model_b.to(device), device, train_loader, verbose=verbose, max_items=max_test_items
         )
         train_acc_list.append(train_acc)
 
         # evaluate on test set
         test_loss, test_acc = test(
-            model_b.to(device), device, test_loader, verbose=0,
+            model_b.to(device), device, test_loader, verbose=verbose,
             max_items=max_test_items
         )
         test_acc_list.append(test_acc)
@@ -70,7 +70,7 @@ def linear_mode_connect(
         model_path_a: str,
         model_path_b: str,
         dataset,
-        batch_size=4098,
+        batch_size=4096,
         n_points=25,
         max_iter=20,
         verbose=2):
@@ -102,15 +102,15 @@ def linear_mode_connect(
 
     model_b = model_factory()
     load_checkpoint(model_b, model_path_b, device)
-
-    dataloader_kwargs = {'batch_size': batch_size}  # TODO can prob increase (no grads)
-
-    train_loader, test_loader = get_data_loaders(dataset, dataloader_kwargs, dataloader_kwargs)
+    
+    train_loader, test_loader = get_data_loaders(dataset, dataloader_kwargs, dataloader_kwargs, eval_only=True)
 
     if verbose >= 1:
         print('\nperforming naive interpolation')
 
     # interpolate naively between models
+
+    
     train_acc_naive, test_acc_naive = model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points=n_points, verbose=verbose)
 
     if verbose >= 1:
