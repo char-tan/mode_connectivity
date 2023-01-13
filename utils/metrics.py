@@ -54,10 +54,11 @@ def models_to_cumulative_distances(models, distance_measure):
         distance_fn = squared_euclid_dist
     else:
         distance_fn = distance_measure
-    return [0.0] + [
+    distances = [0.0] + [
         distance_fn(models[i], models[i+1])
         for i in range(0, len(models) - 1)
     ]
+    return torch.cumsum(torch.tensor(distances), dim=0)
         
 
 # def fisher_info_matrix(model, data):

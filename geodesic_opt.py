@@ -295,6 +295,12 @@ if __name__ == "__main__":
     plt.plot(geodesic_eval["accuracies"]["test"])
     plt.plot(geodesic_eval["accuracies"]["train"])
 
+    comparison = compare_lmc_to_geodesic(
+        geodesic_path_models,
+        train_loader, test_loader, device,
+        max_test_items = 512
+    )
+
     # %% (Cell for testing plot_losses_over_geodesic)
     model_a, model_b = MLP(), MLP()
     load_checkpoint(model_a, "model_files/mlp_mnist_model_a.pt", device)
