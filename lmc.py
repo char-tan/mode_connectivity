@@ -5,7 +5,7 @@ from tqdm import tqdm
 from super import SuperModel
 
 from utils.data import get_data_loaders
-from utils.metrics import JSD_loss, acc_on_path, metric_path_length
+from utils.metrics import JSD_loss, metric_path_length
 from utils.utils import *
 from utils.training_utils import test
 from utils.weight_matching import *

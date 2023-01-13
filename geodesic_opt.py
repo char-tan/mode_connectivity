@@ -5,16 +5,16 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 import numpy as np
 import torch.nn.functional as F
-from evaluate import evaluate_supermodel, evaluate_lmc
+from evaluate import models_to_cumulative_distances, acc_on_path, evaluate_supermodel, evaluate_lmc
 from super import SuperModel
 
-from utils.metrics import JSD_loss, squared_euclid_dist, metric_path_length, models_to_cumulative_distances, acc_on_path
+from utils.metrics import JSD_loss, squared_euclid_dist, metric_path_length
 from utils.objectives import heuristic_triplets, full_params
 from utils.utils import lerp, get_device
 from utils.training_utils import test
 from utils.utils import load_checkpoint, intervals_to_cumulative_sums
 from utils.metrics import JSD_loss
-from lmc import evaluate_lmc, model_interpolation
+from lmc import model_interpolation
 
 # ^ THIS DOES WORK AAAAAAA :)
 

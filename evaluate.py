@@ -4,7 +4,8 @@ import torch
 from tqdm import tqdm
 from super import SuperModel
 from utils.metrics import JSD_loss, metric_path_length, squared_euclid_dist
-import torch.functional as f
+import torch.nn.functional as f
+from utils.utils import get_device
 
 def models_to_cumulative_distances(models, distance_measure):
     if distance_measure == "index":
@@ -46,7 +47,7 @@ def evaluate_supermodel(
     evaluates super_model (a path of models) wrt to dataloader, returns mean step-wise path length, and mean model-wise accuracy
     """
 
-    device, _ = torch.get_device()
+    device, _ = get_device()
 
     path_accs = []
     path_lengths = []
