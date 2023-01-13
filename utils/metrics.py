@@ -11,4 +11,5 @@ def JSD_loss(logits_P, logits_Q):
 
     logP, logQ, logM = torch.log(logP), torch.log(logQ), torch.log(logM)
 
+    # PT KL Div is reversed input
     return (F.kl_div(logM, logP) + F.kl_div(logM, logQ)) / 2
