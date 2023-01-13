@@ -4,31 +4,18 @@ import copy
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-from utils.metrics import JSD_loss, squared_euclid_dist
-# from utils.objectives import heuristic_triplets_obj_function, full_params_obj_function
+from utils.metrics import JSD_loss, squared_euclid_dist, metric_path_length, models_to_cumulative_distances
+from utils.objectives import heuristic_triplets, full_params
 from utils.utils import lerp, get_device
 from utils.training_utils import test
 from utils.utils import load_checkpoint
 from lmc import model_interpolation
 # ^ THIS DOES WORK AAAAAAA :)
 
-def metric_path_length(all_models, loss_metric, data, track_grad = False):
-    # data is a single batch
-    length = 0
-    n = len(all_models)
-
-    if track_grad:
-        length = torch.sum(torch.stack([loss_metric(all_models[i], all_models[i+1], data) for i in range(n-1)]))
-    else:
-        length = sum([loss_metric(all_models[i], all_models[i+1], data).detach() for i in range(n-1)]).detach()
-    # for i in range(0, len(all_models) - 1):
-    #     model0, model1 = all_models[i], all_models[i+1]
-    #     # length += loss_metric(model0, model1, data).detach().cpu().numpy()
-    #     length += loss_metric(model0, model1, data).detach()
-    return length
 
 def optimise_for_geodesic(
-    model_factory, weights_a, weights_b, n, loss_metric, objective_function, dataloader,
+    model_factory, weights_a, weights_b, n,
+    loss_metric, objective_function, dataloader,
     max_iterations = 99, learning_rate = 0.01,
     return_losses = False,
     return_euclid_dist = False
@@ -78,7 +65,10 @@ def optimise_for_geodesic(
 
     print("Optimising geodesic ...")
     for _ in tqdm(range(max_iterations)):
-        opt, loss, batch_images, data_iterator = objective_function(all_models, loss_metric, data_iterator, dataloader, device, learning_rate, n)
+        opt, loss, batch_images, data_iterator = objective_function(
+            all_models, loss_metric, data_iterator, dataloader,
+            device, learning_rate, n
+        )
 
         opt.zero_grad()
         grad = loss.backward()
@@ -101,16 +91,18 @@ def optimise_for_geodesic(
         # or change in L over entire path 
         # so we know if it's doing something
     output = [all_models]
+    if return_losses:
+        output.append(losses)
+    if return_euclid_dist:
+        output.append(euclid_dists)
+    if len(output) > 1:
+        return tuple(output)
+    else:
+        return output[0]
 
-    # if return_losses:
-    #     return all_weights, losses
-    # return all_models
-    return all_models, losses, euclid_dists
-
-def losses_over_geodesic(
-    model_factory, model_a, model_b, train_loader, test_loader, device, n_points=25,
-    verbose=False,
-    loss_metric=JSD_loss, max_iterations=99,
+def evaluate_over_geodesic(
+    geodesic_path_models,
+    train_loader, test_loader, device,
     max_test_items=1024
 ):
     """
@@ -127,17 +119,14 @@ def losses_over_geodesic(
     un-optimised pure LMC path.
     """
     # deepcopy to not change model outside function
-    model_a_weights = copy.deepcopy(model_a.state_dict())
-    model_b_weights = copy.deepcopy(model_b.state_dict())
-
-    geodesic_path_models = optimise_for_geodesic(
-        model_factory, model_a_weights, model_b_weights, n_points,
-        loss_metric, train_loader, max_iterations=max_iterations,
-        return_losses=False
-    )
+    # model_a_weights = copy.deepcopy(model_a.state_dict())
+    # model_b_weights = copy.deepcopy(model_b.state_dict())
 
     train_acc_list = []
     test_acc_list = []
+
+    train_loss_list = []
+    test_loss_list = []
 
     print("Calculating losses over geodesic:")
     for model in tqdm(geodesic_path_models):
@@ -148,6 +137,7 @@ def losses_over_geodesic(
             verbose=0, max_items=max_test_items
         )
         train_acc_list.append(train_acc)
+        train_loss_list.append(train_loss)
 
         # evaluate on test set
         test_loss, test_acc = test(
@@ -155,62 +145,100 @@ def losses_over_geodesic(
             verbose=0, max_items=max_test_items
         )
         test_acc_list.append(test_acc)
+        test_loss_list.append(test_loss)
     
     # print(train_acc_list)
     # print(test_acc_list)
 
-    return train_acc_list, test_acc_list
+    return {
+        "models": geodesic_path_models,
+        "accuracies": {
+            "train": train_acc_list,
+            "test": test_acc_list
+        },
+        "losses": {
+            "train": train_loss_list,
+            "test": test_loss_list
+        }
+    }
 
-def compare_losses_over_geodesic(
-    model_factory, model_a, model_b,
-    train_loader, test_loader, device, n_points=25,
-    loss_metric=JSD_loss, max_iterations=99, verbose = True,
-    max_test_items = None
+def compare_lmc_to_geodesic(
+    geodesic_path_models,
+    train_loader, test_loader, device,
+    verbose = True,
+    max_test_items = None,
+    model_factory = None
 ):
+    n_points = len(geodesic_path_models)
+    model_a = geodesic_path_models[0]
+    model_b = geodesic_path_models[-1]
     if verbose:
         print("Calculating LMC train accuracies ...")
-    lmc_train_accs, lmc_test_accs = model_interpolation(
+    lmc_results = model_interpolation(
         model_a, model_b,
         train_loader, test_loader,
         device, n_points, verbose=0,
-        max_test_items=max_test_items
+        max_test_items=max_test_items,
+        return_dict = True, model_factory = model_factory
     )
 
     if verbose:
         print("Calculating geodesic train accuracies ...")
-    geodesic_train_accs, geodesic_test_accs = losses_over_geodesic(
-        model_factory, model_a, model_b,
-        train_loader, test_loader, device, n_points=n_points,
-        loss_metric=loss_metric, max_iterations=max_iterations,
-        verbose=verbose,
-        max_test_items=max_test_items
-    )
-
-    return ((lmc_train_accs, lmc_test_accs), (geodesic_train_accs, geodesic_test_accs))
-
-def plot_losses_over_geodesic(
-    model_factory, model_a, model_b,
-    train_loader, test_loader, device,
-    n_points=25,
-    loss_metric=JSD_loss,
-    max_iterations=99,
-    max_test_items=None
-):
-    ((lmc_train_accs, lmc_test_accs), (geodesic_train_accs, geodesic_test_accs)) = compare_losses_over_geodesic(
-        model_factory, model_a, model_b,
+    geodesic_results = evaluate_over_geodesic(
+        geodesic_path_models,
         train_loader, test_loader, device,
-        n_points,
-        loss_metric,
-        max_iterations,
         max_test_items=max_test_items
     )
+
+    return {
+        "lmc": lmc_results,
+        "geodesic": geodesic_results
+    }
+
+
+
+def plot_lmc_geodesic_comparison(
+    comparison_obj, # <-- as returned by compare_lmc_to_geodesic
+    path_types = ["geodesic", "lmc"],
+    quantity = "accuracies", # or "losses"
+    quantity_sources = ["test", "train"],
+    distance_measure = "euclidean"
+    # ^ ... or a function from two models to distance, or "index"
+):
     fig, ax = plt.subplots()
-    ax.plot(lmc_train_accs, label="LMC train acc.")
-    ax.plot(lmc_test_accs, label="LMC test acc.")
-    ax.plot(geodesic_train_accs, label="Geodesic train acc.")
-    ax.plot(geodesic_test_accs, label="Geodesic test acc.")
+    linestyles = ["solid", "dotted"]
+    for i, path_type in enumerate(path_types):
+        path_results = comparison_obj[path_type]
+        xs = models_to_cumulative_distances(
+            path_results["models"],
+            distance_measure
+        )
+        for quantity_source in quantity_sources:
+            ax.plot(
+                xs, path_results[quantity][quantity_source],
+                linestyle=linestyles[i],
+                label = f"{path_type} {quantity_source} {quantity}"
+            )
+    distance_name = distance_measure if isinstance(distance_measure, str) else "path"
+    ax.set_title(f"{', '.join(path_types)} {quantity} over {distance_name}")
     ax.legend()
     fig.show()
+    
+
+def plot_losses_over_geodesic(
+    geodesic_path_models,
+    train_loader, test_loader, device,
+    n_points=25,
+    max_test_items=None,
+    **kwargs # see plot_lmc_geodesic_comparison for what these can be
+):
+    comparison_obj = compare_lmc_to_geodesic(
+        geodesic_path_models,
+        train_loader, test_loader, device,
+        n_points,
+        max_test_items=max_test_items
+    )
+    plot_lmc_geodesic_comparison(comparison_obj, **kwargs)
 
 # %%
 if __name__ == "__main__":
@@ -223,9 +251,11 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
     from lmc import model_interpolation
 
-    weights_a = torch.load("model_files/model_a.pt", map_location=torch.device('cpu'))
-    weights_b = torch.load("model_files/model_b.pt", map_location=torch.device('cpu'))
-    weights_bp = torch.load("model_files/permuted_model_b.pt", map_location=torch.device('cpu'))
+    device, device_kwargs = get_device() # what are device_kwargs ???
+
+    weights_a = torch.load("model_files/mlp_mnist_model_a.pt", map_location=torch.device('cpu'))
+    weights_b = torch.load("model_files/mlp_mnist_model_b.pt", map_location=torch.device('cpu'))
+    weights_bp = torch.load("model_files/mlp_mnist_model_pb.pt", map_location=torch.device('cpu'))
 
     trainset = datasets.MNIST(
         root="utils/data", train=True, download=True,
@@ -238,43 +268,38 @@ if __name__ == "__main__":
 
     # %% (A cell for testing optimise_geodesic))
 
-    opt_models, losses = optimise_for_geodesic(
-        MLP, weights_a, weights_b,
-        n = 10,
-        loss_metric = JSD_loss,
-        dataloader = dl,
-        max_iterations = 10, # <-- THIS IS VERY LOW
-        learning_rate = 0.1,
-        return_losses=True
+    geodesic_path_models = optimise_for_geodesic(
+        MLP, weights_a, weights_b, n=25,
+        loss_metric=JSD_loss, dataloader=dl,
+        objective_function=full_params,
+        max_iterations=100,
+        return_losses=False
     )
-
-    plt.plot(losses)
     
     # %% (A cell for testing model_geodesic_interpolation)
     device, device_kwargs = get_device() # what are device_kwargs ???
     model_a, model_b = MLP(), MLP()
-    load_checkpoint(model_a, "model_files/model_a.pt", device)
+    load_checkpoint(model_a, "model_files/mlp_mnist_model_a.pt", device)
     #model_a.load_state_dict(weights_a)
-    load_checkpoint(model_b, "model_files/permuted_model_b.pt", device)
+    load_checkpoint(model_b, "model_files/mlp_mnist_model_pb.pt", device)
     #model_b.load_state_dict(weights_bp)
     train_loader, test_loader = get_data_loaders(
         dataset="mnist", train_kwargs={"batch_size":4}, test_kwargs={"batch_size":4}
     )
     device, device_kwargs = get_device() # what are device_kwargs ???
-    losses_along_path = losses_over_geodesic(
-        MLP, model_a, model_b, train_loader, test_loader, device, n_points=25,
-        loss_metric=JSD_loss, max_iterations=99,
+    geodesic_eval = evaluate_over_geodesic(
+        geodesic_path_models, train_loader, test_loader, device,
         max_test_items=1024
     )
 
-    plt.plot(losses_along_path[0])
-    plt.plot(losses_along_path[1])
+    plt.plot(geodesic_eval["accuracies"]["test"])
+    plt.plot(geodesic_eval["accuracies"]["train"])
 
     # %% (Cell for testing plot_losses_over_geodesic)
     model_a, model_b = MLP(), MLP()
-    load_checkpoint(model_a, "model_files/model_a.pt", device)
+    load_checkpoint(model_a, "model_files/mlp_mnist_model_a.pt", device)
     # model_a.load_state_dict(weights_a)
-    load_checkpoint(model_b, "model_files/permuted_model_b.pt", device)
+    load_checkpoint(model_b, "model_files/mlp_mnist_model_pb.pt", device)
     # model_b.load_state_dict(weights_bp)
     device, device_kwargs = get_device() # what are device_kwargs ???
     model_a.to(device)
@@ -284,9 +309,10 @@ if __name__ == "__main__":
     )
     device, device_kwargs = get_device() # what are device_kwargs ???
     plot_losses_over_geodesic(
-        MLP, model_a, model_b, train_loader, test_loader, device, n_points=25,
-        loss_metric=JSD_loss, max_iterations=4,
-        max_test_items=1024
+        geodesic_path_models,
+        train_loader, test_loader, device,
+        max_test_items=512,
+        distance_measure = "euclidean"
     )
 
 # %%

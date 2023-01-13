@@ -20,12 +20,44 @@ def JSD_loss(model_a, model_b, batch_imgs):
     # note that f.kl_div takes log-probs
     return (kl_div(logP, M) + kl_div(logQ, M)) / 2
 
-def squared_euclid_dist(model_a, model_b, batch_imgs):
-    a_params = model_a.state_dict()
-    b_params = model_b.state_dict()
+def squared_euclid_dist(model_a, model_b, batch_imgs=None):
+    if isinstance(model_a, dict):
+        # make function work with pure state dicts too
+        a_params = model_a
+        b_params = model_b
+    else:
+        a_params = model_a.state_dict()
+        b_params = model_b.state_dict()
     a_vect = state_dict_to_torch_tensor(a_params) 
     b_vect = state_dict_to_torch_tensor(b_params)
     return ((a_vect - b_vect)**2).sum()
+
+def metric_path_length(all_models, loss_metric, data, track_grad = False):
+    # data is a single batch
+    length = 0
+    n = len(all_models)
+
+    if track_grad:
+        length = torch.sum(torch.stack([loss_metric(all_models[i], all_models[i+1], data) for i in range(n-1)]))
+    else:
+        length = sum([loss_metric(all_models[i], all_models[i+1], data).detach() for i in range(n-1)]).detach()
+    # for i in range(0, len(all_models) - 1):
+    #     model0, model1 = all_models[i], all_models[i+1]
+    #     # length += loss_metric(model0, model1, data).detach().cpu().numpy()
+    #     length += loss_metric(model0, model1, data).detach()
+    return length
+
+def models_to_cumulative_distances(models, distance_measure):
+    if distance_measure == "index":
+        return list(range(len(models)))
+    elif distance_measure == "euclidean":
+        distance_fn = squared_euclid_dist
+    else:
+        distance_fn = distance_measure
+    return [0.0] + [
+        distance_fn(models[i], models[i+1])
+        for i in range(0, len(models) - 1)
+    ]
         
 
 # def fisher_info_matrix(model, data):

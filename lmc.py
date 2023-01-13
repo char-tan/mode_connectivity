@@ -10,7 +10,12 @@ from utils.weight_matching import *
 from utils.plot import plot_interp_acc
 
 
-def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points=25, verbose=2, max_test_items=None):
+def model_interpolation(
+    model_a, model_b,
+    train_loader, test_loader,
+    device, n_points=25, verbose=2, max_test_items=None,
+    return_dict = False, model_factory = None
+):
     "evaluates interpolation between two models of same architecture"
 
     # deepcopy to not change model outside function
@@ -23,6 +28,11 @@ def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_p
     train_acc_list = []
     test_acc_list = []
 
+    train_loss_list = []
+    test_loss_list = []
+
+    models = []
+
     for i, lam in tqdm(list(enumerate(lambdas))):
         # linear interpolate model state dicts and load model
         lerp_model = lerp(lam, model_a_dict, model_b_dict)
@@ -33,6 +43,7 @@ def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_p
             model_b.to(device), device, train_loader, verbose=0, max_items=max_test_items
         )
         train_acc_list.append(train_acc)
+        train_loss_list.append(train_loss)
 
         # evaluate on test set
         test_loss, test_acc = test(
@@ -40,6 +51,7 @@ def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_p
             max_items=max_test_items
         )
         test_acc_list.append(test_acc)
+        test_loss_list.append(test_loss)
 
         if verbose >= 1:
             message = f"point {i+1}/{n_points}. "
@@ -48,8 +60,24 @@ def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_p
                 message += f'lam = {lam}, train loss = {train_loss}, test loss = {test_loss}'
                 end = "\n"
             print(message, end=end)
-
-    return train_acc_list, test_acc_list
+        if model_factory != None:
+            models.append(model_factory().load_state_dict(lerp_model))
+        else:
+            models.append(lerp_model)
+    if return_dict:
+        return {
+            "models": models,
+            "accuracies": {
+                "train": train_acc_list,
+                "test": test_acc_list
+            },
+            "losses": {
+                "train": train_loss_list,
+                "test": test_loss_list
+            }
+        }
+    else:
+        return train_acc_list, test_acc_list
 
 
 def permute_model(model_a, model_b, max_iter, verbose):
