@@ -1,7 +1,7 @@
 import torch
 from random import randint
 from itertools import chain
-from geodesic_opt import metric_path_length
+from utils.metrics import metric_path_length
 
 
 def heuristic_triplets(all_models, loss_metric, data_iterator, data_loader, device, learning_rate, n):

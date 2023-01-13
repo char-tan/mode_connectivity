@@ -136,4 +136,8 @@ def projection(vector, plane:TwoDimensionalPlane):
   x = np.sum((vector - plane.origin_vector)*plane.b1)/plane.scale
   y = np.sum((vector - plane.origin_vector)*plane.b2)/plane.scale
   return x,y
+
+def intervals_to_cumulative_sums(array):
+  array = np.concatenate([np.array([0.0]), array], axis=0)
+  return np.cumsum(array, axis=0)
 # %%
