@@ -14,13 +14,12 @@ class Block(nn.Module):
     def __init__(self, in_chans, out_chans, stride, spatial_dim):
         super().__init__()
 
-        # stride = stride
-        self.conv0 = nn.Conv2d(in_chans, out_chans, kernel_size=3, stride=stride, padding=1, bias=False)
-        self.norm0 = nn.LayerNorm([out_chans, spatial_dim, spatial_dim])
+        self.conv1 = nn.Conv2d(in_chans, out_chans, kernel_size=3, stride=stride, padding=1, bias=False)
+        self.norm1 = nn.GroupNorm(num_groups=1, num_channels=out_chans)
 
         # stride = 1
-        self.conv1 = nn.Conv2d(out_chans, out_chans, kernel_size=3, stride=1, padding=1, bias=False)
-        self.norm1 = nn.LayerNorm([out_chans, spatial_dim, spatial_dim])
+        self.conv2 = nn.Conv2d(out_chans, out_chans, kernel_size=3, stride=1, padding=1, bias=False)
+        self.norm2 = nn.GroupNorm(num_groups=1, num_channels=out_chans)
 
         # if stride == 2, need to halve spatial dims of input for skip connection
         if stride != 1:
@@ -29,11 +28,11 @@ class Block(nn.Module):
             # non-standard way of doing this, same as git-rebasin implementation
             self.shortcut = nn.Sequential(*[
                 nn.Conv2d(in_chans, out_chans, kernel_size=1, stride=2, padding=0, bias=False),
-                nn.LayerNorm([out_chans, spatial_dim, spatial_dim])
+                nn.GroupNorm(num_groups=1, num_channels=out_chans)
                 ])
 
         else:
-            self.shortcut = lambda x: x
+            self.shortcut = nn.Identity()
 
     def forward(self, x):
 
@@ -70,8 +69,8 @@ class ResNet(nn.Module):
 
         wm = width_multiplier
 
-        self.conv = nn.Conv2d(3, 16 * wm, kernel_size=3, padding=1, bias=False)
-        self.norm = nn.LayerNorm([16 * wm, 32, 32])
+        self.conv1 = nn.Conv2d(3, 16 * wm, kernel_size=3, padding=1, bias=False)
+        self.norm1 = nn.GroupNorm(num_groups=1, num_channels=16*wm)
 
         group_chans = [16 * wm, 32 * wm, 64 * wm]
         group_blocks = [3, 3, 3]  # for resnet20
@@ -101,7 +100,6 @@ class ResNet(nn.Module):
         x = F.avg_pool2d(x, kernel_size=8, stride=8)
         x = x.view(x.size(0), -1)
         x = self.linear(x)
-        x = F.softmax(x)
 
         return x
 
@@ -112,10 +110,10 @@ class ResNet(nn.Module):
         linear = lambda name, p_in, p_out: {f"{name}.weight": (p_out, p_in), f"{name}.bias": (p_out,)}
 
         block = lambda name, p_in, p_inner, p_out: {
-                **conv(f"{name}.conv0", p_in, p_inner),
-                **norm(f"{name}.norm0", p_inner),
-                **conv(f"{name}.conv1", p_inner, p_out),
-                **norm(f"{name}.norm1", p_out),
+                **conv(f"{name}.conv1", p_in, p_inner),
+                **norm(f"{name}.norm1", p_inner),
+                **conv(f"{name}.conv2", p_inner, p_out),
+                **norm(f"{name}.norm2", p_out),
         }
 
         shortcut = lambda name, p_in, p_out: {
@@ -126,7 +124,7 @@ class ResNet(nn.Module):
         perm_dict = {}
 
         # first conv + norm
-        perm_dict.update({**conv("conv", None, "P_0.0.0"), **norm("norm", "P_0.0.0")})
+        perm_dict.update({**conv("conv1", None, "P_0.0.0"), **norm("norm1", "P_0.0.0")})
 
         # blockgroups
         for i in range(3):
