@@ -23,7 +23,10 @@ def permutation_spec_from_axes_to_perm(axes_to_perm: dict) -> PermutationSpec:
 
 def get_permuted_param(ps: PermutationSpec, perm, k: str, params, except_axis=None):
     """Get parameter `k` from `params`, with the permutations applied."""
+
     w = params[k]
+
+    # apply the permutaion to the params
     for axis, p in enumerate(ps.axes_to_perm[k]):
         # Skip the axis we're trying to permute.
         if axis == except_axis:
@@ -32,6 +35,7 @@ def get_permuted_param(ps: PermutationSpec, perm, k: str, params, except_axis=No
         # None indicates that there is no permutation relevant to that axis.
         if p is not None:
             w = torch.index_select(w, axis, perm[p].int())
+
 
     return w
 

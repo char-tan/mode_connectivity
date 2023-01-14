@@ -43,6 +43,7 @@ def model_interpolation(
         train_loss, train_acc = test(
             model_b.to(device), device, train_loader, verbose=verbose, max_items=max_test_items
         )
+
         train_acc_list.append(train_acc)
         train_loss_list.append(train_loss)
 

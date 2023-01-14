@@ -1,0 +1,242 @@
+Files already downloaded and verified
+Files already downloaded and verified
+
+performing naive interpolation
+Average loss: 0.0103, Accuracy: (100%)
+Average loss: 0.4141, Accuracy: (90%)
+point 1/20. lam = 0.0, train loss = 0.010327189521789551, test loss = 0.4141289978027344
+Average loss: 0.0161, Accuracy: (100%)
+Average loss: 0.4154, Accuracy: (90%)
+point 2/20. lam = 0.05263157933950424, train loss = 0.016110582790374757, test loss = 0.41542233276367185
+Average loss: 0.0423, Accuracy: (99%)
+Average loss: 0.4421, Accuracy: (89%)
+point 3/20. lam = 0.10526315867900848, train loss = 0.04225408164978027, test loss = 0.4421302185058594
+Average loss: 0.1333, Accuracy: (95%)
+Average loss: 0.5120, Accuracy: (86%)
+point 4/20. lam = 0.15789473056793213, train loss = 0.13328180419921876, test loss = 0.5119906188964843
+Average loss: 0.3948, Accuracy: (87%)
+Average loss: 0.7133, Accuracy: (80%)
+point 5/20. lam = 0.21052631735801697, train loss = 0.39477153564453127, test loss = 0.7132821533203125
+Average loss: 1.1397, Accuracy: (67%)
+Average loss: 1.2993, Accuracy: (65%)
+point 6/20. lam = 0.2631579041481018, train loss = 1.139695322265625, test loss = 1.29932578125
+Average loss: 2.8435, Accuracy: (32%)
+Average loss: 2.7614, Accuracy: (34%)
+point 7/20. lam = 0.31578946113586426, train loss = 2.8434543505859375, test loss = 2.7614359375
+Average loss: 4.7619, Accuracy: (14%)
+Average loss: 4.6634, Accuracy: (16%)
+point 8/20. lam = 0.3684210479259491, train loss = 4.761857075195312, test loss = 4.66343193359375
+Average loss: 5.8229, Accuracy: (11%)
+Average loss: 5.8449, Accuracy: (11%)
+point 9/20. lam = 0.42105263471603394, train loss = 5.82292392578125, test loss = 5.84488505859375
+Average loss: 6.2742, Accuracy: (11%)
+Average loss: 6.3493, Accuracy: (10%)
+point 10/20. lam = 0.4736842215061188, train loss = 6.274221962890625, test loss = 6.34929873046875
+Average loss: 6.4946, Accuracy: (11%)
+Average loss: 6.5304, Accuracy: (11%)
+point 11/20. lam = 0.5263158082962036, train loss = 6.49462646484375, test loss = 6.5304162109375
+Average loss: 6.3488, Accuracy: (12%)
+Average loss: 6.3438, Accuracy: (12%)
+point 12/20. lam = 0.5789473652839661, train loss = 6.348772783203125, test loss = 6.343831640625
+Average loss: 5.3675, Accuracy: (16%)
+Average loss: 5.4180, Accuracy: (16%)
+point 13/20. lam = 0.6315789222717285, train loss = 5.36748400390625, test loss = 5.41798564453125
+Average loss: 3.3982, Accuracy: (32%)
+Average loss: 3.5753, Accuracy: (30%)
+point 14/20. lam = 0.6842105388641357, train loss = 3.398196103515625, test loss = 3.57526513671875
+Average loss: 1.5124, Accuracy: (63%)
+Average loss: 1.8053, Accuracy: (59%)
+point 15/20. lam = 0.7368420958518982, train loss = 1.5124128515625, test loss = 1.80534736328125
+Average loss: 0.5631, Accuracy: (84%)
+Average loss: 0.9388, Accuracy: (78%)
+point 16/20. lam = 0.7894736528396606, train loss = 0.5630713983154297, test loss = 0.9388409423828125
+Average loss: 0.1876, Accuracy: (94%)
+Average loss: 0.5879, Accuracy: (86%)
+point 17/20. lam = 0.8421052694320679, train loss = 0.18760619842529297, test loss = 0.5879170166015625
+Average loss: 0.0495, Accuracy: (98%)
+Average loss: 0.4533, Accuracy: (89%)
+point 18/20. lam = 0.8947368264198303, train loss = 0.04948936958312988, test loss = 0.4532632568359375
+Average loss: 0.0144, Accuracy: (100%)
+Average loss: 0.4114, Accuracy: (90%)
+point 19/20. lam = 0.9473684430122375, train loss = 0.014376446685791015, test loss = 0.4113914855957031
+Average loss: 0.0086, Accuracy: (100%)
+Average loss: 0.4142, Accuracy: (91%)
+point 20/20. lam = 1.0, train loss = 0.00861728199005127, test loss = 0.41423408203125
+
+permuting model
+iteration 0 P_BG_1_IN_0: progress 26.888755798339844
+iteration 0 P_BG_1_IN_2: progress 10.075410842895508
+iteration 0 P_BG_0: progress 29.76605224609375
+iteration 0 P_BG_2_IN_2: progress 35.70368576049805
+iteration 0 P_BG_0_IN_2: progress 3.534005641937256
+iteration 0 P_BG_0_IN_0: progress 8.327701568603516
+iteration 0 P_BG_2: progress 129.773681640625
+iteration 0 P_BG_1_IN_1: progress 13.224138259887695
+iteration 0 P_BG_2_IN_1: progress 30.131683349609375
+iteration 0 P_BG_1: progress 9.06463623046875
+iteration 0 P_BG_0_IN_1: progress 4.980049133300781
+iteration 0 P_BG_2_IN_0: progress 34.880027770996094
+iteration 1 P_BG_2_IN_2: progress 27.241043090820312
+iteration 1 P_BG_1_IN_2: progress 5.144744873046875
+iteration 1 P_BG_0_IN_1: progress 0.0
+iteration 1 P_BG_1: progress 2.0688934326171875
+iteration 1 P_BG_2: progress 1.023956298828125
+iteration 1 P_BG_0_IN_2: progress 0.0
+iteration 1 P_BG_1_IN_0: progress 9.709735870361328
+iteration 1 P_BG_1_IN_1: progress 6.381534576416016
+iteration 1 P_BG_2_IN_0: progress 3.1074981689453125
+iteration 1 P_BG_2_IN_1: progress 0.808349609375
+iteration 1 P_BG_0_IN_0: progress 0.0
+iteration 1 P_BG_0: progress 0.0
+iteration 2 P_BG_1_IN_2: progress 2.036334991455078
+iteration 2 P_BG_2_IN_2: progress 0.749481201171875
+iteration 2 P_BG_0: progress 0.0
+iteration 2 P_BG_1: progress 0.0
+iteration 2 P_BG_2_IN_1: progress 0.0
+iteration 2 P_BG_0_IN_1: progress 0.0
+iteration 2 P_BG_1_IN_1: progress 0.0
+iteration 2 P_BG_2: progress 0.252349853515625
+iteration 2 P_BG_0_IN_2: progress 0.0
+iteration 2 P_BG_1_IN_0: progress 0.0
+iteration 2 P_BG_0_IN_0: progress 0.0
+iteration 2 P_BG_2_IN_0: progress 1.247314453125
+iteration 3 P_BG_0: progress 0.0
+iteration 3 P_BG_1: progress 0.821441650390625
+iteration 3 P_BG_2: progress 0.0
+iteration 3 P_BG_2_IN_0: progress 1.6095123291015625
+iteration 3 P_BG_1_IN_0: progress 0.4965705871582031
+iteration 3 P_BG_1_IN_1: progress 0.6364173889160156
+iteration 3 P_BG_2_IN_1: progress 1.8694229125976562
+iteration 3 P_BG_0_IN_1: progress 0.0
+iteration 3 P_BG_2_IN_2: progress 0.797698974609375
+iteration 3 P_BG_1_IN_2: progress 0.8540325164794922
+iteration 3 P_BG_0_IN_0: progress 0.0
+iteration 3 P_BG_0_IN_2: progress 0.0
+iteration 4 P_BG_2: progress 0.139739990234375
+iteration 4 P_BG_1: progress 0.04278564453125
+iteration 4 P_BG_1_IN_0: progress 0.20342254638671875
+iteration 4 P_BG_1_IN_1: progress 0.8784523010253906
+iteration 4 P_BG_2_IN_1: progress 1.7170486450195312
+iteration 4 P_BG_0: progress 0.09152984619140625
+iteration 4 P_BG_0_IN_0: progress 1.0131511688232422
+iteration 4 P_BG_1_IN_2: progress 0.4547080993652344
+iteration 4 P_BG_0_IN_2: progress 0.3710298538208008
+iteration 4 P_BG_2_IN_0: progress 0.473114013671875
+iteration 4 P_BG_2_IN_2: progress 0.42919921875
+iteration 4 P_BG_0_IN_1: progress 0.37886810302734375
+iteration 5 P_BG_0_IN_2: progress 0.0
+iteration 5 P_BG_1_IN_1: progress 0.0
+iteration 5 P_BG_1: progress 0.684478759765625
+iteration 5 P_BG_2_IN_1: progress 0.0
+iteration 5 P_BG_0_IN_1: progress 0.0
+iteration 5 P_BG_0_IN_0: progress 0.0
+iteration 5 P_BG_0: progress 0.402252197265625
+iteration 5 P_BG_2_IN_0: progress 0.590240478515625
+iteration 5 P_BG_2_IN_2: progress 0.0
+iteration 5 P_BG_1_IN_2: progress 1.1579875946044922
+iteration 5 P_BG_2: progress 0.697479248046875
+iteration 5 P_BG_1_IN_0: progress 2.960693359375
+iteration 6 P_BG_0_IN_0: progress 2.6478309631347656
+iteration 6 P_BG_1_IN_2: progress 0.0
+iteration 6 P_BG_2: progress 0.0
+iteration 6 P_BG_0: progress 0.0
+iteration 6 P_BG_2_IN_1: progress 1.4852523803710938
+iteration 6 P_BG_1: progress 2.0220184326171875
+iteration 6 P_BG_1_IN_1: progress 5.165611267089844
+iteration 6 P_BG_0_IN_2: progress 0.9720416069030762
+iteration 6 P_BG_1_IN_0: progress 1.5838584899902344
+iteration 6 P_BG_0_IN_1: progress 1.1792001724243164
+iteration 6 P_BG_2_IN_0: progress 7.396087646484375
+iteration 6 P_BG_2_IN_2: progress 0.8124771118164062
+iteration 7 P_BG_0_IN_1: progress 0.0
+iteration 7 P_BG_0: progress 0.0
+iteration 7 P_BG_2: progress 0.0
+iteration 7 P_BG_0_IN_2: progress 0.0
+iteration 7 P_BG_2_IN_1: progress 0.0
+iteration 7 P_BG_1: progress 2.88104248046875
+iteration 7 P_BG_0_IN_0: progress 0.0
+iteration 7 P_BG_2_IN_2: progress 0.0
+iteration 7 P_BG_2_IN_0: progress 2.3051528930664062
+iteration 7 P_BG_1_IN_0: progress 0.12185287475585938
+iteration 7 P_BG_1_IN_1: progress 0.6702804565429688
+iteration 7 P_BG_1_IN_2: progress 6.738121032714844
+iteration 8 P_BG_1_IN_1: progress 0.0
+iteration 8 P_BG_0_IN_2: progress 0.0
+iteration 8 P_BG_1_IN_0: progress 0.0
+iteration 8 P_BG_0_IN_1: progress 0.0
+iteration 8 P_BG_1_IN_2: progress 0.0
+iteration 8 P_BG_0: progress 0.0
+iteration 8 P_BG_2: progress 0.0
+iteration 8 P_BG_0_IN_0: progress 0.0
+iteration 8 P_BG_2_IN_2: progress 0.0
+iteration 8 P_BG_1: progress 0.0
+iteration 8 P_BG_2_IN_1: progress 0.0
+iteration 8 P_BG_2_IN_0: progress 0.0
+
+performing permuted interpolation
+Average loss: 0.0107, Accuracy: (100%)
+Average loss: 0.4141, Accuracy: (90%)
+point 1/20. lam = 0.0, train loss = 0.01065609796524048, test loss = 0.4141289978027344
+Average loss: 0.0155, Accuracy: (100%)
+Average loss: 0.4219, Accuracy: (90%)
+point 2/20. lam = 0.05263157933950424, train loss = 0.015496567401885986, test loss = 0.4218578857421875
+Average loss: 0.0339, Accuracy: (99%)
+Average loss: 0.4538, Accuracy: (89%)
+point 3/20. lam = 0.10526315867900848, train loss = 0.0339305339050293, test loss = 0.45377272338867186
+Average loss: 0.0894, Accuracy: (97%)
+Average loss: 0.5241, Accuracy: (87%)
+point 4/20. lam = 0.15789473056793213, train loss = 0.0893830192565918, test loss = 0.5240870483398438
+Average loss: 0.2325, Accuracy: (93%)
+Average loss: 0.6540, Accuracy: (84%)
+point 5/20. lam = 0.21052631735801697, train loss = 0.23254535400390625, test loss = 0.6539769653320312
+Average loss: 0.4895, Accuracy: (86%)
+Average loss: 0.8794, Accuracy: (79%)
+point 6/20. lam = 0.2631579041481018, train loss = 0.4894728387451172, test loss = 0.8793782958984375
+Average loss: 0.9165, Accuracy: (76%)
+Average loss: 1.2566, Accuracy: (71%)
+point 7/20. lam = 0.31578946113586426, train loss = 0.9165163134765625, test loss = 1.25656953125
+Average loss: 1.5245, Accuracy: (64%)
+Average loss: 1.8138, Accuracy: (60%)
+point 8/20. lam = 0.3684210479259491, train loss = 1.5245274853515625, test loss = 1.8137903564453124
+Average loss: 2.1934, Accuracy: (52%)
+Average loss: 2.4221, Accuracy: (49%)
+point 9/20. lam = 0.42105263471603394, train loss = 2.1933955029296874, test loss = 2.422072265625
+Average loss: 2.6645, Accuracy: (45%)
+Average loss: 2.8207, Accuracy: (43%)
+point 10/20. lam = 0.4736842215061188, train loss = 2.6644674951171874, test loss = 2.8206916015625
+Average loss: 2.6789, Accuracy: (44%)
+Average loss: 2.8377, Accuracy: (43%)
+point 11/20. lam = 0.5263158082962036, train loss = 2.678944951171875, test loss = 2.837694091796875
+Average loss: 2.2610, Accuracy: (51%)
+Average loss: 2.4497, Accuracy: (49%)
+point 12/20. lam = 0.5789473652839661, train loss = 2.2609894140625, test loss = 2.4496771484375
+Average loss: 1.5812, Accuracy: (63%)
+Average loss: 1.8496, Accuracy: (60%)
+point 13/20. lam = 0.6315789222717285, train loss = 1.5811587329101562, test loss = 1.84957900390625
+Average loss: 0.9733, Accuracy: (76%)
+Average loss: 1.2779, Accuracy: (71%)
+point 14/20. lam = 0.6842105388641357, train loss = 0.9732506921386719, test loss = 1.2779412841796876
+Average loss: 0.5205, Accuracy: (86%)
+Average loss: 0.8903, Accuracy: (79%)
+point 15/20. lam = 0.7368420958518982, train loss = 0.5205141943359375, test loss = 0.8903426879882812
+Average loss: 0.2448, Accuracy: (92%)
+Average loss: 0.6475, Accuracy: (85%)
+point 16/20. lam = 0.7894736528396606, train loss = 0.24483260620117187, test loss = 0.6474869873046875
+Average loss: 0.0921, Accuracy: (97%)
+Average loss: 0.5103, Accuracy: (88%)
+point 17/20. lam = 0.8421052694320679, train loss = 0.09208827133178711, test loss = 0.5102958679199219
+Average loss: 0.0312, Accuracy: (99%)
+Average loss: 0.4427, Accuracy: (90%)
+point 18/20. lam = 0.8947368264198303, train loss = 0.031245695724487304, test loss = 0.44267210083007813
+Average loss: 0.0124, Accuracy: (100%)
+Average loss: 0.4159, Accuracy: (91%)
+point 19/20. lam = 0.9473684430122375, train loss = 0.01238581609725952, test loss = 0.4159201049804688
+Average loss: 0.0080, Accuracy: (100%)
+Average loss: 0.4142, Accuracy: (91%)
+point 20/20. lam = 1.0, train loss = 0.008012668313980103, test loss = 0.41423408813476564
+[99.75, 99.604, 98.552, 95.392, 86.858, 66.664, 31.764, 14.176, 10.606, 10.604, 10.956, 12.26, 16.126, 31.796, 62.738, 84.39, 93.928, 98.33, 99.612, 99.798]
+[90.39, 89.85, 88.83, 86.21, 80.29, 64.89, 33.55, 16.05, 10.79, 10.21, 10.68, 12.34, 15.78, 29.92, 58.72, 77.91, 85.53, 88.97, 90.43, 90.78]
+[99.736, 99.588, 98.87, 96.864, 92.506, 85.804, 76.054, 63.576, 51.728, 44.508, 43.974, 51.222, 63.284, 75.608, 85.602, 92.47, 96.838, 98.906, 99.646, 99.826]
+[90.39, 90.06, 89.2, 87.37, 84.09, 79.0, 71.16, 60.22, 49.38, 43.17, 42.76, 49.1, 59.53, 71.3, 79.04, 84.71, 87.99, 89.77, 90.6, 90.78]
+
+

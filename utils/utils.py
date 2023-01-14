@@ -102,15 +102,20 @@ def generate_orthogonal_basis(v1, v2, v3):
 
   return TwoDimensionalPlane(b1=basis1_normed, b2=basis2_normed, scale=scale, origin_vector=origin_vector)
 
-def generate_loss_landscape_contour(model, device, train_loader, test_loader, plane:TwoDimensionalPlane, granularity:int=20):
+def generate_loss_landscape_contour(model, device, train_loader, test_loader, plane:TwoDimensionalPlane, granularity:int=20, return_train=True):
   """Given a plane in the loss landscape generate the loss and acc at grid points in the plane."""
   t1s = np.linspace(-0.5,1.5,granularity+1)
   t2s = np.linspace(-0.5,1.5,granularity)
 
   test_acc_grid = np.zeros((len(t1s),len(t2s)))
   test_loss_grid = np.zeros((len(t1s),len(t2s)))
-  train_acc_grid = np.zeros((len(t1s),len(t2s)))
-  train_loss_grid = np.zeros((len(t1s),len(t2s)))
+
+  if return_train:
+    train_acc_grid = np.zeros((len(t1s),len(t2s)))
+    train_loss_grid = np.zeros((len(t1s),len(t2s)))
+  else:
+    train_acc_grid = None
+    train_loss_grid = None
 
   example_state_dict = model.state_dict()
   for i1,t1 in tqdm(enumerate(t1s)):
@@ -123,12 +128,16 @@ def generate_loss_landscape_contour(model, device, train_loader, test_loader, pl
       model.eval()
       with torch.no_grad():
         test_loss, test_acc = test(model.to(device), device, test_loader, verbose=0)
-        train_loss, train_acc = test(model.to(device), device, train_loader, verbose=0)
-      
+
+        if return_train:
+            train_loss, train_acc = test(model.to(device), device, train_loader, verbose=0)
+
       test_acc_grid[i1,i2] = test_acc
       test_loss_grid[i1,i2] = test_loss
-      train_acc_grid[i1,i2] = train_acc
-      train_loss_grid[i1,i2] = train_loss
+
+      if return_train:
+        train_acc_grid[i1,i2] = train_acc
+        train_loss_grid[i1,i2] = train_loss
 
   return t1s, t2s, test_acc_grid, test_loss_grid, train_acc_grid, train_loss_grid
 
@@ -136,6 +145,7 @@ def projection(vector, plane:TwoDimensionalPlane):
   x = np.sum((vector - plane.origin_vector)*plane.b1)/plane.scale
   y = np.sum((vector - plane.origin_vector)*plane.b2)/plane.scale
   return x,y
+
 
 def intervals_to_cumulative_sums(array):
   array = np.concatenate([np.array([0.0]), array], axis=0)
