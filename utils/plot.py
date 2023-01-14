@@ -11,6 +11,7 @@ def plot_interp_metric(
     train_metric_interp_clever,
     test_metric_interp_clever,
 ):
+
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.plot(

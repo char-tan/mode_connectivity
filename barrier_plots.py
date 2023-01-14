@@ -74,8 +74,9 @@ for txt_file in sorted(txt_files):
             line = [float(item) for item in line]
             output_lines += [line]
 
-        train_acc_barriers.append(-loss_barrier(output_lines[-2]))
-        test_acc_barriers.append(-loss_barrier(output_lines[-1]))
+        if not 'mlp' in txt_file:
+            train_acc_barriers.append(-loss_barrier(output_lines[-2]))
+            test_acc_barriers.append(-loss_barrier(output_lines[-1]))
 
         fig = plot_interp_metric("accuracy", lambdas, *output_lines)
         name = txt_file.replace('.txt', '.png')
@@ -83,9 +84,6 @@ for txt_file in sorted(txt_files):
 
 resnet_train_barriers, vgg_train_barriers = train_acc_barriers[:3], train_acc_barriers[3:]
 resnet_test_barriers, vgg_test_barriers = test_acc_barriers[:3], test_acc_barriers[3:]
-
-
-print(resnet_train_barriers, resnet_test_barriers)
 
 fig = plot_width_acc(np.array(resnet_train_barriers), np.array(resnet_test_barriers), 'resnet cifar10')
 fig.savefig('resnet_width_barrier.png')
