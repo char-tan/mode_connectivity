@@ -7,7 +7,7 @@ from torch.autograd import Variable
 import sys
 import numpy as np
 
-from utils.weight_matching import permutation_spec_from_axes_to_perm
+from ..utils.weight_matching import permutation_spec_from_axes_to_perm
 
 
 class Block(nn.Module):
@@ -38,11 +38,11 @@ class Block(nn.Module):
 
         # go through layers
         y = x
-        y = self.conv0(y)
-        y = self.norm0(y)
-        y = F.relu(y)
         y = self.conv1(y)
         y = self.norm1(y)
+        y = F.relu(y)
+        y = self.conv2(y)
+        y = self.norm2(y)
 
         # go through shortcut
         x = self.shortcut(x)
@@ -93,8 +93,8 @@ class ResNet(nn.Module):
 
     def forward(self, x):
 
-        x = self.conv(x)
-        x = self.norm(x)
+        x = self.conv1(x)
+        x = self.norm1(x)
         x = F.relu(x)
         x = self.block_groups(x)
         x = F.avg_pool2d(x, kernel_size=8, stride=8)
