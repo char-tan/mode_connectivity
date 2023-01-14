@@ -92,6 +92,9 @@ def generate_loss_landscape_contour(model, device, train_loader, test_loader, pl
   if return_train:
     train_acc_grid = np.zeros((len(t1s),len(t2s)))
     train_loss_grid = np.zeros((len(t1s),len(t2s)))
+  else:
+    train_acc_grid = None
+    train_loss_grid = None
 
   example_state_dict = model.state_dict()
   for i1,t1 in tqdm(enumerate(t1s)):
@@ -107,13 +110,13 @@ def generate_loss_landscape_contour(model, device, train_loader, test_loader, pl
 
         if return_train:
             train_loss, train_acc = test(model.to(device), device, train_loader, verbose=0)
-        else:
-            train_loss, train_acc = np.zeros_like(test_loss), np.zero_like(test_acc)
 
       test_acc_grid[i1,i2] = test_acc
       test_loss_grid[i1,i2] = test_loss
-      train_acc_grid[i1,i2] = train_acc
-      train_loss_grid[i1,i2] = train_loss
+
+      if return_train:
+        train_acc_grid[i1,i2] = train_acc
+        train_loss_grid[i1,i2] = train_loss
 
   return t1s, t2s, test_acc_grid, test_loss_grid, train_acc_grid, train_loss_grid
 
