@@ -5,10 +5,10 @@ from torch.utils.tensorboard import SummaryWriter
 from typing import List, Optional, Callable, Dict
 from argparse import Namespace
 
-from .utils.data import get_data_loaders
-from .utils.training_utils import train, test
-from .utils.utils import get_device
-from .training_config import TrainingConfig
+from utils.data import get_data_loaders
+from utils.training_utils import train, test
+from utils.utils import get_device
+from training_config import TrainingConfig
 
 from datetime import datetime
 

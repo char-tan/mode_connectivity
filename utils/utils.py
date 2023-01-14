@@ -1,8 +1,12 @@
+# %%
+import sys
+sys.path.insert(0, "..")
+
 import copy
 import numpy as np
 import torch
 from tqdm import tqdm
-from ..training import test
+from utils.training_utils import test
 from dataclasses import dataclass
 
 @dataclass
@@ -12,6 +16,18 @@ class TwoDimensionalPlane:
   b2: np.array
   scale: float
   origin_vector: np.array
+
+class AddGaussianNoise(object):
+  """Transform that adds Gaussian noise to data"""
+  def __init__(self, mean=0., std=1.):
+    self.std = std
+    self.mean = mean
+        
+  def __call__(self, tensor):
+    return tensor + torch.randn(tensor.size()) * self.std + self.mean
+    
+  def __repr__(self):
+    return self.__class__.__name__ + '(mean={0}, std={1})'.format(self.mean, self.std)
 
 
 def load_checkpoint(model, model_path, device):
@@ -61,6 +77,11 @@ def reconstruct(vector, example_state_dict):
     i = i + size_now
   return output
 
+def state_dict_to_torch_tensor(model_params):
+  """Flatten the state_dict of a model into a torch Tensor (vector) of weights."""
+  keys = model_params.keys()
+  v = torch.cat([model_params[key].reshape([-1]) for key in keys],axis=0)
+  return v
 
 def state_dict_to_numpy_array(model_params):
   """Flatten the state_dict of a model into a numpy array (vector) of weights."""
@@ -115,3 +136,8 @@ def projection(vector, plane:TwoDimensionalPlane):
   x = np.sum((vector - plane.origin_vector)*plane.b1)/plane.scale
   y = np.sum((vector - plane.origin_vector)*plane.b2)/plane.scale
   return x,y
+
+def intervals_to_cumulative_sums(array):
+  array = np.concatenate([np.array([0.0]), array], axis=0)
+  return np.cumsum(array, axis=0)
+# %%

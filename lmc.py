@@ -1,15 +1,22 @@
 import torch
 import copy
 from typing import Callable
+from tqdm import tqdm
+from super import SuperModel
 
-from .utils.data import get_data_loaders
-from .utils.utils import *
-from .utils.training_utils import test
-from .utils.weight_matching import *
-from .utils.plot import plot_interp_acc
+from utils.data import get_data_loaders
+from utils.metrics import JSD_loss, metric_path_length
+from utils.utils import *
+from utils.training_utils import test
+from utils.weight_matching import *
+from utils.plot import plot_interp_acc
 
 
-def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points=25, verbose=2):
+def model_interpolation(
+    model_a, model_b,
+    train_loader, test_loader,
+    device, n_points=25, verbose=2, max_test_items=None,
+):
     "evaluates interpolation between two models of same architecture"
 
     # deepcopy to not change model outside function
@@ -22,18 +29,30 @@ def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_p
     train_acc_list = []
     test_acc_list = []
 
-    for i, lam in enumerate(lambdas):
+    train_loss_list = []
+    test_loss_list = []
+
+    models = []
+
+    for i, lam in tqdm(list(enumerate(lambdas))):
         # linear interpolate model state dicts and load model
         lerp_model = lerp(lam, model_a_dict, model_b_dict)
         model_b.load_state_dict(lerp_model)
 
         # evaluate on train set
-        train_loss, train_acc = test(model_b.to(device), device, train_loader, verbose=0)
+        train_loss, train_acc = test(
+            model_b.to(device), device, train_loader, verbose=verbose, max_items=max_test_items
+        )
         train_acc_list.append(train_acc)
+        train_loss_list.append(train_loss)
 
         # evaluate on test set
-        test_loss, test_acc = test(model_b.to(device), device, test_loader, verbose=0)
+        test_loss, test_acc = test(
+            model_b.to(device), device, test_loader, verbose=verbose,
+            max_items=max_test_items
+        )
         test_acc_list.append(test_acc)
+        test_loss_list.append(test_loss)
 
         if verbose >= 1:
             message = f"point {i+1}/{n_points}. "
@@ -42,8 +61,24 @@ def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_p
                 message += f'lam = {lam}, train loss = {train_loss}, test loss = {test_loss}'
                 end = "\n"
             print(message, end=end)
+        models.append(lerp_model)
+    else:
+        return train_acc_list, test_acc_list
 
-    return train_acc_list, test_acc_list
+# OLD RETURN TYPE:
+# (based on experiments, accuracies are most revealing
+#  when graphed so have switched to the new return type)
+# return {
+#         "models": geodesic_path_models,
+#         "accuracies": {
+#             "train": train_acc_list,
+#             "test": test_acc_list
+#         },
+#         "losses": {
+#             "train": train_loss_list,
+#             "test": test_loss_list
+#         }
+#     }
 
 
 def permute_model(model_a, model_b, max_iter, verbose):
@@ -65,7 +100,7 @@ def linear_mode_connect(
         model_path_a: str,
         model_path_b: str,
         dataset,
-        batch_size=4098,
+        batch_size=4096,
         n_points=25,
         max_iter=20,
         verbose=2):
@@ -97,15 +132,16 @@ def linear_mode_connect(
 
     model_b = model_factory(**model_kwargs)
     load_checkpoint(model_b, model_path_b, device)
+    
+    dataloader_kwargs = {'batch_size': batch_size}
 
-    dataloader_kwargs = {'batch_size': batch_size}  # TODO can prob increase (no grads)
-
-    train_loader, test_loader = get_data_loaders(dataset, dataloader_kwargs, dataloader_kwargs)
+    train_loader, test_loader = get_data_loaders(dataset, dataloader_kwargs, dataloader_kwargs, eval_only=True)
 
     if verbose >= 1:
         print('\nperforming naive interpolation')
 
     # interpolate naively between models
+    
     train_acc_naive, test_acc_naive = model_interpolation(model_a, model_b, train_loader, test_loader, device, n_points=n_points, verbose=verbose)
 
     if verbose >= 1:
