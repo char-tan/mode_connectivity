@@ -4,10 +4,9 @@ import torch.nn.init as init
 import torch.nn.functional as F
 from torch.autograd import Variable
 
+from ..utils.weight_matching import permutation_spec_from_axes_to_perm
 import sys
 import numpy as np
-
-from ..utils.weight_matching import permutation_spec_from_axes_to_perm
 
 
 class Block(nn.Module):
@@ -109,14 +108,18 @@ class ResNet(nn.Module):
         norm = lambda name, p: {f"{name}.weight": (p,), f"{name}.bias": (p,)}
         linear = lambda name, p_in, p_out: {f"{name}.weight": (p_out, p_in), f"{name}.bias": (p_out,)}
 
-        block = lambda name, p_in, p_inner, p_out: {
+        block = lambda name, p_in, p_inner: {
+                **conv(f"{name}.conv1", p_in, p_inner),
+                **norm(f"{name}.norm1", p_inner),
+                **conv(f"{name}.conv2", p_inner, p_in),
+                **norm(f"{name}.norm2", p_in),
+        }
+
+        shortcut_block = lambda name, p_in, p_inner, p_out: {
                 **conv(f"{name}.conv1", p_in, p_inner),
                 **norm(f"{name}.norm1", p_inner),
                 **conv(f"{name}.conv2", p_inner, p_out),
                 **norm(f"{name}.norm2", p_out),
-        }
-
-        shortcut = lambda name, p_in, p_out: {
                 **conv(f"{name}.shortcut.0", p_in, p_out),
                 **norm(f"{name}.shortcut.1", p_out),
         }
@@ -124,26 +127,24 @@ class ResNet(nn.Module):
         perm_dict = {}
 
         # first conv + norm
-        perm_dict.update({**conv("conv1", None, "P_0.0.0"), **norm("norm1", "P_0.0.0")})
+        perm_dict.update({**conv("conv1", None, "P_BG_0"), **norm("norm1", "P_BG_0")})
 
-        # blockgroups
-        for i in range(3):
-            for j in range(3):
 
-                block_name = f"block_groups.{i}.blocks.{j}"
-                p_in = f"P_{i}.{j}.0"
-                p_inner = f"P_{i}.{j}.1"
+        # block group 0
+        perm_dict.update({**block(f"block_groups.0.blocks.0", f"P_BG_0", f"P_BG_0_IN_0")})
+        perm_dict.update({**block(f"block_groups.0.blocks.1", f"P_BG_0", f"P_BG_0_IN_1")})
+        perm_dict.update({**block(f"block_groups.0.blocks.2", f"P_BG_0", f"P_BG_0_IN_2")})
 
-                # needs to match following block / blockgroup
-                p_out = f"P_{i + (j + 1) // 3}.{(j + 1) % 3}.0"
+        # block group 1
+        perm_dict.update({**shortcut_block(f"block_groups.1.blocks.0", f"P_BG_0", f"P_BG_1_IN_0", "P_BG_1")})
+        perm_dict.update({**block(f"block_groups.1.blocks.1", f"P_BG_1", f"P_BG_1_IN_1")})
+        perm_dict.update({**block(f"block_groups.1.blocks.2", f"P_BG_1", f"P_BG_1_IN_2")})
 
-                perm_dict.update({**block(block_name, p_in, p_inner, p_out)})
-
-                # add shortcut
-                if j == 0 and i > 0:
-                    perm_dict.update({**shortcut(block_name, p_in, p_out)})
-
-        # linear
-        perm_dict.update({**linear("linear", "P_3.0.0", None)})
+        # block group 2
+        perm_dict.update({**shortcut_block(f"block_groups.2.blocks.0", f"P_BG_1", f"P_BG_2_IN_0", "P_BG_2")})
+        perm_dict.update({**block(f"block_groups.2.blocks.1", f"P_BG_2", f"P_BG_2_IN_1")})
+        perm_dict.update({**block(f"block_groups.2.blocks.2", f"P_BG_2", f"P_BG_2_IN_2")})
+        perm_dict.update({**linear("linear", "P_BG_2", None)})
 
         return permutation_spec_from_axes_to_perm(perm_dict)
+
