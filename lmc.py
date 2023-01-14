@@ -28,11 +28,11 @@ def model_interpolation(model_a, model_b, train_loader, test_loader, device, n_p
         model_b.load_state_dict(lerp_model)
 
         # evaluate on train set
-        train_loss, train_acc = test(model_b.to(device), device, train_loader, verbose=0)
+        train_loss, train_acc = test(model_b.to(device), device, train_loader, verbose=verbose)
         train_acc_list.append(train_acc)
 
         # evaluate on test set
-        test_loss, test_acc = test(model_b.to(device), device, test_loader, verbose=0)
+        test_loss, test_acc = test(model_b.to(device), device, test_loader, verbose=verbose)
         test_acc_list.append(test_acc)
 
         if verbose >= 1:
@@ -65,7 +65,7 @@ def linear_mode_connect(
         model_path_a: str,
         model_path_b: str,
         dataset,
-        batch_size=4098,
+        batch_size=4096,
         n_points=25,
         max_iter=20,
         verbose=2):
