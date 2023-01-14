@@ -4,7 +4,7 @@ import torch.nn.init as init
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-from ..utils.weight_matching import permutation_spec_from_axes_to_perm
+from utils.weight_matching import permutation_spec_from_axes_to_perm
 import sys
 import numpy as np
 
