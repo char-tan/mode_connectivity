@@ -129,8 +129,11 @@ def plot_lmc_geodesic_comparison_obj(comparison_obj):
     geodesic_accs = comparison_obj["geodesic"]["accuracies"]
     ax.plot(lmc_xs, lmc_accs, label="lmc")
     ax.plot(geodesic_xs, geodesic_accs, label="geodesic")
+    ax.set_ylabel("Accuracy")
+    ax.set_xlabel("Distance along path by distance metric")
     ax.legend()
     fig.show()
+    return fig, ax
 
 # def plot_lmc_geodesic_comparison(
 #     comparison_obj, # <-- as returned by compare_lmc_to_geodesic
