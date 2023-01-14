@@ -44,7 +44,7 @@ def metric_path_length(outputs, loss_metric=JSD_loss, return_stepwise=False):
     if return_stepwise:
         return np.array(stepwise)
     else:
-        return length
+        return total
 
 # OLD VERSION:
 # def metric_path_length(all_models, loss_metric, data, track_grad = False):
