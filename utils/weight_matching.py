@@ -26,21 +26,16 @@ def get_permuted_param(ps: PermutationSpec, perm, k: str, params, except_axis=No
 
     w = params[k]
 
-    if not 'shortcut' in k:
+    # apply the permutaion to the params
+    for axis, p in enumerate(ps.axes_to_perm[k]):
+        # Skip the axis we're trying to permute.
+        if axis == except_axis:
+            continue
 
-        # apply the permutaion to the params
-        for axis, p in enumerate(ps.axes_to_perm[k]):
-            # Skip the axis we're trying to permute.
-            if axis == except_axis:
-                continue
+        # None indicates that there is no permutation relevant to that axis.
+        if p is not None:
+            w = torch.index_select(w, axis, perm[p].int())
 
-            # None indicates that there is no permutation relevant to that axis.
-            if p is not None:
-                w = torch.index_select(w, axis, perm[p].int())
-
-    # shortcut params do not need permuting
-    else:
-        w = w
 
     return w
 
