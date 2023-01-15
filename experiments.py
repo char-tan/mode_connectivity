@@ -8,6 +8,7 @@ from models.vgg import VGG
 from super import SuperModel
 from utils.metrics import euclid_dist, index_distance, sqrt_JSD_loss
 from utils.utils import get_device, AddGaussianNoise
+from utils.utils import state_dict_to_numpy_array, distance_to_line, generate_orthogonal_basis, projection, lerp_vectors
 from utils import data
 
 device, _ = get_device()
@@ -62,19 +63,45 @@ def opt_plot(path_lengths, sq_euc_dists, rolling_mean_length=50):
     fig.show()
     return fig, ax
 
-def snapshot_plot(snapshot):
-    fig, ax = plt.subplots()
+def snapshot_plots(snapshots, save_path, experiment_name):
+    final_geodesic_weights = snapshots[-1]['weights']
+    v_start = state_dict_to_numpy_array(final_geodesic_weights[0])
+    v_end = state_dict_to_numpy_array(final_geodesic_weights[-1])
 
-    straight_line_points = snapshot['straight_pts']
-    projected_points = snapshot['projected_pts']
+    # find furthest point away from line connecting first and last model in param space
+    distances_to_line = [(distance_to_line(v_start, v_end, state_dict_to_numpy_array(weights))) for weights in final_geodesic_weights]
+    furthest_point = final_geodesic_weights[np.array(distances_to_line).argmax()]
 
-    ax.scatter(np.array(straight_line_points)[:,0],np.array(straight_line_points)[:,1], label='straight line')
-    ax.scatter(np.array(projected_points)[:, 0], np.array(projected_points)[:, 1], label='projected points')
-    ax.set_xlabel('x-coordinate on chosen plane', fontsize = 14)
-    ax.set_ylabel('y-coordinate on chosen plane', fontsize = 14)
-    ax.legend()
-    
-    return fig, ax
+    # find plane defined by v_start, v_end, and furthest point from the line v_start -- v_end
+    furthest_point_plane = generate_orthogonal_basis(v_start, v_end, state_dict_to_numpy_array(furthest_point))
+
+    straight_line_points = [
+        lerp_vectors(lam, v_start, v_end) for lam in np.linspace(0, 1, len(final_geodesic_weights) + 1)
+    ]
+
+    for snapshot_i in snapshots:
+        geodesic_weights = snapshot_i['weights']
+
+        # project all other points onto this plane
+        v1 = state_dict_to_numpy_array(geodesic_weights[0])
+        furthest_projected_points = [projection(v1, furthest_point_plane)]
+        for weights in geodesic_weights[1:]:
+            vi = state_dict_to_numpy_array(weights)
+            furthest_projected_points.append(projection(vi, furthest_point_plane))
+        
+        fig_i, ax_i = plt.subplots()
+
+        ax_i.scatter(np.array(straight_line_points)[:,0],np.array(straight_line_points)[:,1], label='straight line')
+        ax_i.scatter(np.array(furthest_projected_points)[:, 0], np.array(furthest_projected_points)[:, 1], label='projected points')
+        ax_i.set_xlabel('x-coordinate on chosen plane', fontsize = 14)
+        ax_i.set_ylabel('y-coordinate on chosen plane', fontsize = 14)
+        ax_i.legend()
+
+        epoch_id = snapshot_i['epoch_id']
+        batch_id = snapshot_i['batch_id']
+        fig_i.suptitle('Projected points for epoch ' + str(epoch_id) + ' and batch '+ str(batch_id))
+        fig_i.savefig(save_path + experiment_name + 'snapshot_epoch_' + str(epoch_id) + '_batch_' + str(batch_id) + '.png')
+        fig_i.show()
 
 
 def run_experiment(
@@ -118,13 +145,7 @@ def run_experiment(
     torch.save(super_model, save_path + experiment_name + '_super_model.pt')
 
     # plot snapshots
-    for snapshot_i in snapshots:
-        fig_i, ax_i = snapshot_plot(snapshot_i)
-        epoch_id = snapshot_i['epoch_id']
-        batch_id = snapshot_i['batch_id']
-        fig_i.suptitle('Projected points for epoch ' + str(epoch_id) + ' and batch '+ str(batch_id))
-        fig_i.savefig(save_path + experiment_name + 'snapshot_epoch_' + str(epoch_id) + '_batch_' + str(batch_id) + '.png')
-        fig_i.show()
+    snapshot_plots(snapshots, save_path, experiment_name)
 
     # plot path action in GD alg
     fig, ax = opt_plot(path_action, sq_euc_dists)

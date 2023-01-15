@@ -13,7 +13,7 @@ from utils.objectives import heuristic_triplets, full_params
 from utils.utils import lerp, get_device
 from utils.training_utils import test
 from utils.utils import load_checkpoint, intervals_to_cumulative_sums
-from utils.utils import state_dict_to_numpy_array, distance_to_line, generate_orthogonal_basis, projection, lerp_vectors
+from utils.utils import state_dict_to_numpy_array, distance_to_line, generate_orthogonal_basis, projection
 from utils.metrics import JSD_loss
 from lmc import model_interpolation
 
@@ -44,7 +44,7 @@ def optimise_for_geodesic(
     snapshot_ids = np.round(np.linspace(0, n_interpolated - 1, n_snapshots_per_epoch)).astype(int)
     if (n_interpolated-1) not in snapshot_ids:
         snapshot_ids.append((n_interpolated -1))
-    snapshot_points = []
+    snapshots = []
 
     optimizer = torch.optim.SGD(super_model.parameters(), lr=lr)
 
@@ -72,17 +72,11 @@ def optimise_for_geodesic(
                     f"batch {batch_idx+1} | path length {path_length} | sq euc dist {sq_euc_dist}"
                 )
             if batch_idx in snapshot_ids:
-                projected_points = geodesic_projection_plane(super_model)
-                straight_line_points = [
-                    lerp_vectors(lam, projected_points[0], projected_points[-1]) for lam in np.linspace(0, 1, len(super_model.models) + 1)
-                ]
-                snapshot_points.append({
-                    'epoch_id': epoch_idx+1,
+                snapshots.append({
+                    'epoch_id': epoch_idx,
                     'batch_id': batch_idx,
-                    'straight_pts': straight_line_points, 
-                    'projected_pts': projected_points,
+                    'weights': [super_model.models[i].state_dict() for i in range(len(super_model.models))]
                 })
-
 
             path_length.backward()
             optimizer.step()
@@ -95,7 +89,7 @@ def optimise_for_geodesic(
                 f"epoch {epoch_idx+1} | path length {np.mean(path_lengths)} | sq euc dist {np.mean(sq_euc_dists)}"
             )
 
-    return path_lengths, sq_euc_dists, snapshot_points
+    return path_lengths, sq_euc_dists, snapshots
 
 def compare_lmc_to_geodesic(
     geodesic_smodel,
@@ -243,8 +237,8 @@ def plot_lmc_geodesic_comparison_obj(
         fig.show()
         return fig, axs
 
-def geodesic_projection_plane(super_model):
-    geodesic_weights = [super_model.models[i].state_dict() for i in range(len(super_model.models))]
+def geodesic_projection_plane(geodesic_weights):
+    # geodesic_weights = [super_model.models[i].state_dict() for i in range(len(super_model.models))]
     v_start = state_dict_to_numpy_array(geodesic_weights[0])
     v_end = state_dict_to_numpy_array(geodesic_weights[-1])
 
