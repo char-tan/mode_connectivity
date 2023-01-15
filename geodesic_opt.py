@@ -13,6 +13,7 @@ from utils.objectives import heuristic_triplets, full_params
 from utils.utils import lerp, get_device
 from utils.training_utils import test
 from utils.utils import load_checkpoint, intervals_to_cumulative_sums
+from utils.utils import state_dict_to_numpy_array, distance_to_line, generate_orthogonal_basis, projection, lerp_vectors
 from utils.metrics import JSD_loss
 from lmc import model_interpolation
 
@@ -25,8 +26,11 @@ def optimise_for_geodesic(
     dataloader,
     lr=0.01,
     num_epochs=1,
+    n_snapshots_per_epoch = 1,
     verbose=1,
-    loss_metric=JSD_loss
+    loss_metric=JSD_loss,
+    savepath="mode_connectivity/experiments/",
+    experimentname="test"
 ):
 
     """
@@ -37,6 +41,12 @@ def optimise_for_geodesic(
 
     path_lengths = []
     sq_euc_dists = []
+
+    n_interpolated = len(list(enumerate(dataloader)))
+    snapshot_ids = np.round(np.linspace(0, n_interpolated - 1, n_snapshots_per_epoch)).astype(int)
+    if (n_interpolated-1) not in snapshot_ids:
+        snapshot_ids.append((n_interpolated -1))
+    snapshot_points = []
 
     optimizer = torch.optim.SGD(super_model.parameters(), lr=lr)
 
@@ -51,7 +61,6 @@ def optimise_for_geodesic(
         if verbose > 0:
             print(f"Epoch {epoch_idx} of {num_epochs}")
         for batch_idx, (data, target) in tqdm(list(enumerate(dataloader))):
-
             data, target = data.to(device), target.to(device)
             optimizer.zero_grad()
             outputs = super_model(data)
@@ -64,6 +73,22 @@ def optimise_for_geodesic(
                 print(
                     f"batch {batch_idx} | path length {path_length} | sq euc dist {sq_euc_dist}"
                 )
+            if batch_idx in snapshot_ids:
+                projected_points = geodesic_projection_plane(super_model)
+                straight_line_points = [
+                    lerp_vectors(lam, projected_points[0], projected_points[-1]) for lam in np.linspace(0, 1, len(super_model.models) + 1)
+                ]
+                snapshot_points.append({
+                    'epoch_id': epoch_idx,
+                    'batch_id': batch_idx,
+                    'straight_pts': straight_line_points, 
+                    'projected_pts': projected_points,
+                })
+
+                plt.scatter(np.array(straight_line_points)[:,0],np.array(straight_line_points)[:,1])
+                plt.scatter(np.array(projected_points)[:, 0], np.array(projected_points)[:, 1])
+                plt.savefig(savepath + experimentname + '_snapshot_epoch_' + str(epoch_idx) + '_batch_' + str(batch_idx) + '.png')
+
 
             path_length.backward()
             optimizer.step()
@@ -76,7 +101,7 @@ def optimise_for_geodesic(
                 f"epoch {epoch_idx} | path length {np.mean(path_lengths)} | sq euc dist {np.mean(sq_euc_dists)}"
             )
 
-    return path_lengths, sq_euc_dists
+    return path_lengths, sq_euc_dists, snapshot_points
 
 def compare_lmc_to_geodesic(
     geodesic_smodel,
@@ -223,6 +248,28 @@ def plot_lmc_geodesic_comparison_obj(
         fig.legend()
         fig.show()
         return fig, axs
+
+def geodesic_projection_plane(super_model):
+    geodesic_weights = [super_model.models[i].state_dict() for i in range(len(super_model.models))]
+    v_start = state_dict_to_numpy_array(geodesic_weights[0])
+    v_end = state_dict_to_numpy_array(geodesic_weights[-1])
+
+    # find furthest point away from line connecting first and last model in param space
+    distances_to_line = [(distance_to_line(v_start, v_end, state_dict_to_numpy_array(weights))) for weights in geodesic_weights]
+    furthest_point = geodesic_weights[np.array(distances_to_line).argmax()]
+
+    # find plane defined by v_start, v_end, and furthest point from the line v_start -- v_end
+    furthest_point_plane = generate_orthogonal_basis(v_start, v_end, state_dict_to_numpy_array(furthest_point))
+
+    # project all other points onto this plane
+    v1 = state_dict_to_numpy_array(geodesic_weights[0])
+    furthest_projected_points = [projection(v1, furthest_point_plane)]
+    for weights in geodesic_weights[1:]:
+        vi = state_dict_to_numpy_array(weights)
+        furthest_projected_points.append(projection(vi, furthest_point_plane))
+    
+    return furthest_projected_points
+    
 
 
 # def plot_lmc_geodesic_comparison(

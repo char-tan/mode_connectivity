@@ -68,6 +68,7 @@ def run_experiment(
     permute=True,
     geodesic_opt_lr=1e-1,
     geodesic_opt_epochs=3,
+    num_snapshots_per_epoch = 1, # plot projections of supermodel
     noise_var = 0,
     plot_figsize=(10,5),
     plot_relative_x=True,
@@ -86,25 +87,31 @@ def run_experiment(
         noise_var
     )
 
-    path_lengths, sq_euc_dists = optimise_for_geodesic(
+    # find geodesic and track path_actions during GD
+    path_action, sq_euc_dists, snapshots = optimise_for_geodesic(
          super_model,
          train_loader,
          lr = geodesic_opt_lr,
          verbose=1,
-         num_epochs=geodesic_opt_epochs
+         num_epochs=geodesic_opt_epochs,
+         n_snapshots_per_epoch = num_snapshots_per_epoch,
+         savepath= save_path,
+         experimentname= experiment_name,
     )
 
-    torch.save(path_lengths, save_path + experiment_name + '_path_lengths.pt')
+    torch.save(path_action, save_path + experiment_name + '_path_action.pt')
     torch.save(sq_euc_dists, save_path + experiment_name + '_sq_euc_dists.pt')
+    torch.save(snapshots, save_path + experiment_name + '_snapshots.pt')
     torch.save(super_model, save_path + experiment_name + '_super_model.pt')
 
-    fig, ax = opt_plot(path_lengths, sq_euc_dists)
+    fig, ax = opt_plot(path_action, sq_euc_dists)
     fig.suptitle(experiment_name + " - geodesic optimisation")
 
     fig.savefig(save_path + experiment_name + "_gdopt_plot.png")
 
     fig.show()
 
+    # training and test accuracy comparison for lmc and geodesic
     comparison = compare_lmc_to_geodesic(
         super_model,
         model_factory,
