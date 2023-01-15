@@ -86,9 +86,10 @@ def evaluate_lmc(
     to dataloader, returns mean step-wise path length,
     and mean model-wise accuracy
     """
+    device, _ = get_device()
     weights_a = copy.deepcopy(weights_a)
     weights_b = copy.deepcopy(weights_b)
-    lmc_super_model = SuperModel(model_factory, n, weights_a, weights_b)
+    lmc_super_model = SuperModel(model_factory, n, weights_a, weights_b).to(device)
     return evaluate_supermodel(
         lmc_super_model,
         dataloader,
