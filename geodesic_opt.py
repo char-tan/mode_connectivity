@@ -158,7 +158,8 @@ def compare_lmc_to_geodesic(
 
 def plot_lmc_geodesic_comparison_obj(
     comparison_obj, # either a single one, or pair (test, train)
-    figsize=(10, 5)
+    figsize=(10, 5),
+    relative_x=False, # make x-axis from 0 to 1
 ):
     if not isinstance(comparison_obj, tuple) and "lengths" in comparison_obj["lmc"].keys():
         # Then we know this is using the "old-fashioned",
@@ -193,24 +194,32 @@ def plot_lmc_geodesic_comparison_obj(
                 geodesic_xs = intervals_to_cumulative_sums(obj["geodesic"][dkey])
                 geodesic_accs = obj["geodesic"]["accuracies"]
                 extra_lbl = ""
+                if relative_x:
+                    lmc_xs /= lmc_xs.max()
+                    geodesic_xs /= geodesic_xs.max()
                 if len(comparison_objs) == 2:
                     extra_lbl = ", test" if j == 0 else ", train"
                 ax.plot(
                     lmc_xs,
                     lmc_accs,
                     label="lmc" + extra_lbl if i == 0 else None,
-                    linestyle="solid" if j == 0 else "dashed"
-                    # ^ solid for first (assumed test) dataloader, otherwise dashed
+                    linestyle="solid" if j == 0 else "dashed",
+                    # ^ solid for first (assumed test) dataloader, otherwise dashed,
+                    marker='.'
                 )
                 ax.plot(
                     geodesic_xs,
                     geodesic_accs,
                     label="geodesic" + extra_lbl if i == 0 else None,
-                    linestyle="solid" if j == 0 else "dashed"
+                    linestyle="solid" if j == 0 else "dashed",
+                    marker='.'
                 )
                 if i == 0:
                     ax.set_ylabel("Accuracy")
-                ax.set_xlabel(f"Distance along path by {dkey}")
+                if relative_x:
+                    ax.set_label(f"Relative distance along path by {dkey}")
+                else:
+                    ax.set_xlabel(f"Distance along path by {dkey}")
         fig.legend()
         fig.show()
         return fig, axs
