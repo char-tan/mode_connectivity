@@ -122,7 +122,7 @@ def run_experiment(
         fig_i, ax_i = snapshot_plot(snapshot_i)
         epoch_id = snapshot_i['epoch_id']
         batch_id = snapshot_i['batch_id']
-        fig.suptitle('Projected points for epoch ' + str(epoch_id) + ' and batch '+ str(batch_id))
+        fig_i.suptitle('Projected points for epoch ' + str(epoch_id) + ' and batch '+ str(batch_id))
         fig_i.save_fig(save_path + experiment_name + 'snapshot_epoch_' + str(epoch_id) + '_batch_' + str(batch_id) + '.png')
         fig_i.show()
 
