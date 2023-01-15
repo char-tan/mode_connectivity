@@ -33,6 +33,8 @@ def squared_euclid_dist(model_a, model_b, batch_imgs=None):
         b_vect = state_dict_to_torch_tensor(model_b.state_dict())
     return ((a_vect - b_vect)**2).sum()
 
+def index_distance(model_a, model_b, data=None):
+    return torch.tensor(1)
 
 def metric_path_length(outputs, loss_metric=JSD_loss, return_stepwise=False):
     """
