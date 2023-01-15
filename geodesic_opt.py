@@ -29,8 +29,6 @@ def optimise_for_geodesic(
     n_snapshots_per_epoch = 1,
     verbose=1,
     loss_metric=JSD_loss,
-    savepath="mode_connectivity/experiments/",
-    experimentname="test"
 ):
 
     """
@@ -84,10 +82,6 @@ def optimise_for_geodesic(
                     'straight_pts': straight_line_points, 
                     'projected_pts': projected_points,
                 })
-
-                plt.scatter(np.array(straight_line_points)[:,0],np.array(straight_line_points)[:,1])
-                plt.scatter(np.array(projected_points)[:, 0], np.array(projected_points)[:, 1])
-                plt.savefig(savepath + experimentname + '_snapshot_epoch_' + str(epoch_idx) + '_batch_' + str(batch_idx) + '.png')
 
 
             path_length.backward()

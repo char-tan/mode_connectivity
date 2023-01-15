@@ -62,6 +62,21 @@ def opt_plot(path_lengths, sq_euc_dists, rolling_mean_length=50):
     fig.show()
     return fig, ax
 
+def snapshot_plot(snapshot):
+    fig, ax = plt.subplots()
+
+    straight_line_points = snapshot['straight_pts']
+    projected_points = snapshot['projected_pts']
+
+    ax.scatter(np.array(straight_line_points)[:,0],np.array(straight_line_points)[:,1], label='straight line')
+    ax.scatter(np.array(projected_points)[:, 0], np.array(projected_points)[:, 1], label='projected points')
+    ax.set_xlabel('x-coordinate on chosen plane', fontsize = 14)
+    ax.set_ylabel('y-coordinate on chosen plane', fontsize = 14)
+    ax.legend()
+    
+    return fig, ax
+
+
 def run_experiment(
     config,
     n_points=25,
@@ -95,8 +110,6 @@ def run_experiment(
          verbose=1,
          num_epochs=geodesic_opt_epochs,
          n_snapshots_per_epoch = num_snapshots_per_epoch,
-         savepath= save_path,
-         experimentname= experiment_name,
     )
 
     torch.save(path_action, save_path + experiment_name + '_path_action.pt')
@@ -104,6 +117,15 @@ def run_experiment(
     torch.save(snapshots, save_path + experiment_name + '_snapshots.pt')
     torch.save(super_model, save_path + experiment_name + '_super_model.pt')
 
+    # plot snapshots
+    for snapshot_i in snapshots:
+        fig_i, ax_i = snapshot_plot(snapshot_i)
+        epoch_id = snapshot_i['epoch_id']
+        batch_id = snapshot_i['batch_id']
+        fig.suptitle('Projected points for epoch ' + str(epoch_id) + ' and batch '+ str(batch_id))
+        fig_i.save_fig(save_path + experiment_name + 'snapshot_epoch_' + str(epoch_id) + '_batch_' + str(batch_id) + '.png')
+
+    # plot path action in GD alg
     fig, ax = opt_plot(path_action, sq_euc_dists)
     fig.suptitle(experiment_name + " - geodesic optimisation")
 
