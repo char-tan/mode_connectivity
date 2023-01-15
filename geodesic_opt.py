@@ -85,6 +85,17 @@ def compare_lmc_to_geodesic(
     distance_metric,
     verbose = 1,
 ):
+    if isinstance(dataloader, tuple):
+        return tuple([
+            compare_lmc_to_geodesic(
+                geodesic_smodel,
+                model_factory,
+                specific_dataloader,
+                distance_metric,
+                verbose
+            )
+            for specific_dataloader in dataloader
+        ])
     if isinstance(distance_metric, dict):
         distance_metrics = tuple(distance_metric.values())
     n_points = len(geodesic_smodel.models)
@@ -146,13 +157,14 @@ def compare_lmc_to_geodesic(
 
 
 def plot_lmc_geodesic_comparison_obj(
-    comparison_obj # either a single one, or pair (test, train)
+    comparison_obj, # either a single one, or pair (test, train)
+    figsize=(10, 5)
 ):
-    if "lengths" in comparison_obj["lmc"].keys():
+    if not isinstance(comparison_obj, tuple) and "lengths" in comparison_obj["lmc"].keys():
         # Then we know this is using the "old-fashioned",
         # i.e. single-distance-returning, version of the
         # behaviour of compare_lmc_to_geodesic
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=figsize)
         lmc_xs = intervals_to_cumulative_sums(comparison_obj["lmc"]["lengths"])
         lmc_accs = comparison_obj["lmc"]["accuracies"]
         geodesic_xs = intervals_to_cumulative_sums(comparison_obj["geodesic"]["lengths"])
@@ -165,19 +177,40 @@ def plot_lmc_geodesic_comparison_obj(
         fig.show()
         return fig, ax
     else:
-        distance_keys = list(comparison_obj["lmc"].keys()).remove("accuracies")
+        if not isinstance(comparison_obj, tuple):
+            comparison_objs = (comparison_obj,)
+        else:
+            comparison_objs = comparison_obj
+        distance_keys = list(comparison_objs[0]["lmc"].keys())
+        distance_keys.remove("accuracies")
         num_dist_measures = len(distance_keys)
-        fig, axs = plt.subplots(1, num_dist_measures)
+        fig, axs = plt.subplots(1, num_dist_measures, figsize=figsize, sharey=True)
         for i, dkey in enumerate(distance_keys):
-            ax = axs[i]
-            lmc_xs = intervals_to_cumulative_sums(comparison_obj["lmc"][dkey])
-            lmc_accs = comparison_obj["lmc"]["accuracies"]
-            geodesic_xs = intervals_to_cumulative_sums(comparison_obj["geodesic"][dkey])
-            geodesic_accs = comparison_obj["geodesic"]["accuracies"]
-            ax.plot(lmc_xs, lmc_accs, label="lmc")
-            ax.plot(geodesic_xs, geodesic_accs, label="geodesic")
-            ax.set_ylabel("Accuracy")
-            ax.set_xlabel(f"Distance along path by {dkey}")
+            for j, obj in enumerate(comparison_objs):
+                ax = axs[i]
+                lmc_xs = intervals_to_cumulative_sums(obj["lmc"][dkey])
+                lmc_accs = obj["lmc"]["accuracies"]
+                geodesic_xs = intervals_to_cumulative_sums(obj["geodesic"][dkey])
+                geodesic_accs = obj["geodesic"]["accuracies"]
+                extra_lbl = ""
+                if len(comparison_objs) == 2:
+                    extra_lbl = ", test" if j == 0 else ", train"
+                ax.plot(
+                    lmc_xs,
+                    lmc_accs,
+                    label="lmc" + extra_lbl if i == 0 else None,
+                    linestyle="solid" if j == 0 else "dashed"
+                    # ^ solid for first (assumed test) dataloader, otherwise dashed
+                )
+                ax.plot(
+                    geodesic_xs,
+                    geodesic_accs,
+                    label="geodesic" + extra_lbl if i == 0 else None,
+                    linestyle="solid" if j == 0 else "dashed"
+                )
+                if i == 0:
+                    ax.set_ylabel("Accuracy")
+                ax.set_xlabel(f"Distance along path by {dkey}")
         fig.legend()
         fig.show()
         return fig, axs
@@ -289,6 +322,8 @@ if __name__ == "__main__":
     # %%
 
     plot_lmc_geodesic_comparison_obj(comparison)
+
+    # NOW: SEE THE geodesic_experiments.ipynb NOTEBOOK FOR USE EXAMPLES
 
     
     # %%
