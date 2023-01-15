@@ -7,7 +7,7 @@ from models.resnet import ResNet
 from models.vgg import VGG
 from super import SuperModel
 from utils.metrics import euclid_dist, index_distance, sqrt_JSD_loss
-from utils.utils import get_device
+from utils.utils import get_device, AddGaussianNoise
 from utils import data
 
 device, _ = get_device()
@@ -24,9 +24,9 @@ def load_weights(name, permuted):
     path2 = path + name + path2_end
     return torch.load(path1, map_location=device), torch.load(path2, map_location=device)
 
-def get_dataloaders(dataset): # returns a (test, train) pair
+def get_dataloaders(dataset, noise_var): # returns a (test, train) pair
     return data.get_data_loaders(
-        dataset=dataset, train_kwargs=train_kwargs, test_kwargs=test_kwargs, eval_only=True
+        dataset=dataset, train_kwargs=train_kwargs, test_kwargs=test_kwargs, additional_train_transforms = AddGaussianNoise(mean = 0, std = np.sqrt(noise_var)), eval_only=True
     )
 
 mlp_config = (MLP, "mlp_mnist_model", "", "mnist")
@@ -34,12 +34,12 @@ resnet_config = lambda n : (ResNet(width_multiplier=n), "resnet_wm", str(n), "ci
 vgg_config = lambda n : (VGG(width_multiplier=n), "vgg_wm", str(n), "cifar10")
 # see model_files folder for which numbers are valid
 
-def make_super(config, n, permuted):
+def make_super(config, n, permuted, noise_var):
     # if permuted=True, uses the permuted version of the weights
     # (it is assumed both permuted and non-permuted exist, this is not a given)
     model_factory, name, name_n, dataset_name = config
     weights_a, weights_b = load_weights(name + name_n, permuted)
-    trainloader, testloader = get_dataloaders(dataset_name)
+    trainloader, testloader = get_dataloaders(dataset_name, noise_var)
     return SuperModel(config[0], n, weights_a, weights_b).to(device), trainloader, testloader, model_factory
 
 def rolling_mean(x, window):
@@ -68,6 +68,7 @@ def run_experiment(
     permute=True,
     geodesic_opt_lr=1e-1,
     geodesic_opt_epochs=3,
+    noise_var = 0,
     plot_figsize=(10,5),
     plot_relative_x=True,
     distance_metrics={
@@ -81,16 +82,21 @@ def run_experiment(
     super_model, train_loader, test_loader, model_factory = make_super(
         config,
         n_points,
-        permute
+        permute,
+        noise_var
     )
 
-    path_lengths, sq_euc_dists  = optimise_for_geodesic(
+    path_lengths, sq_euc_dists = optimise_for_geodesic(
          super_model,
          train_loader,
          lr = geodesic_opt_lr,
          verbose=1,
          num_epochs=geodesic_opt_epochs
     )
+
+    torch.save(path_lengths, save_path + experiment_name + '_path_lengths.pt')
+    torch.save(sq_euc_dists, save_path + experiment_name + '_sq_euc_dists.pt')
+    torch.save(super_model, save_path + experiment_name + '_super_model.pt')
 
     fig, ax = opt_plot(path_lengths, sq_euc_dists)
     fig.suptitle(experiment_name + " - geodesic optimisation")
@@ -107,7 +113,7 @@ def run_experiment(
         verbose = 1,
     )
 
-    torch.save(comparison, save_path + experiment_name + "_comparison_dict")
+    torch.save(comparison, save_path + experiment_name + "_comparison_dict.pt")
 
     fig2, ax2 = plot_lmc_geodesic_comparison_obj(
         comparison,
