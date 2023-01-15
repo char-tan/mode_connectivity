@@ -101,7 +101,7 @@ def distance_to_line(p1, p2, p3):
     projected_point = np.dot(line, point)
     pp = projected_point/np.linalg.norm(line)
     pn = np.linalg.norm(point)
-    return np.sqrt(pn**2 - pp**2)
+    return np.sqrt(np.abs(pn**2 - pp**2)) # absolute function to account for rounding errors
 
 def generate_orthogonal_basis(v1, v2, v3):
   """Generate a two-dimensional plane, given any three points in space which define it."""

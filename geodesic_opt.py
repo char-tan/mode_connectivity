@@ -57,7 +57,7 @@ def optimise_for_geodesic(
 
     for epoch_idx in range(num_epochs):
         if verbose > 0:
-            print(f"Epoch {epoch_idx} of {num_epochs}")
+            print(f"Epoch {epoch_idx+1} of {num_epochs}")
         for batch_idx, (data, target) in tqdm(list(enumerate(dataloader))):
             data, target = data.to(device), target.to(device)
             optimizer.zero_grad()
@@ -77,7 +77,7 @@ def optimise_for_geodesic(
                     lerp_vectors(lam, projected_points[0], projected_points[-1]) for lam in np.linspace(0, 1, len(super_model.models) + 1)
                 ]
                 snapshot_points.append({
-                    'epoch_id': epoch_idx,
+                    'epoch_id': epoch_idx+1,
                     'batch_id': batch_idx,
                     'straight_pts': straight_line_points, 
                     'projected_pts': projected_points,
