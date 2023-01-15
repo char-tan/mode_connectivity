@@ -69,7 +69,7 @@ def optimise_for_geodesic(
 
             if verbose >= 2:
                 print(
-                    f"batch {batch_idx} | path length {path_length} | sq euc dist {sq_euc_dist}"
+                    f"batch {batch_idx+1} | path length {path_length} | sq euc dist {sq_euc_dist}"
                 )
             if batch_idx in snapshot_ids:
                 projected_points = geodesic_projection_plane(super_model)
@@ -92,7 +92,7 @@ def optimise_for_geodesic(
 
         if verbose == 1:
             print(
-                f"epoch {epoch_idx} | path length {np.mean(path_lengths)} | sq euc dist {np.mean(sq_euc_dists)}"
+                f"epoch {epoch_idx+1} | path length {np.mean(path_lengths)} | sq euc dist {np.mean(sq_euc_dists)}"
             )
 
     return path_lengths, sq_euc_dists, snapshot_points
