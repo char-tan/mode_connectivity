@@ -30,8 +30,8 @@ def get_dataloaders(dataset): # returns a (test, train) pair
     )
 
 mlp_config = (MLP, "mlp_mnist_model", "", "mnist")
-resnet_config = lambda n : (ResNet, "resnet_wm", str(n), "cifar10")
-vgg_config = lambda n : (VGG, "vgg_wm", str(n), "cifar10")
+resnet_config = lambda n : (ResNet(width_multiplier=n), "resnet_wm", str(n), "cifar10")
+vgg_config = lambda n : (VGG(width_multiplier=n), "vgg_wm", str(n), "cifar10")
 # see model_files folder for which numbers are valid
 
 def make_super(config, n, permuted):
