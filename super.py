@@ -35,7 +35,7 @@ class SuperModel(nn.Module):
 
     def forward(self, x):
 
-        x = x.view(x.shape[0], -1)
+        #x = x.view(x.shape[0], -1)
 
         outputs = []
 

@@ -217,7 +217,7 @@ def plot_lmc_geodesic_comparison_obj(
                 if i == 0:
                     ax.set_ylabel("Accuracy")
                 if relative_x:
-                    ax.set_label(f"Relative distance along path by {dkey}")
+                    ax.set_xlabel(f"Relative distance along path by {dkey}")
                 else:
                     ax.set_xlabel(f"Distance along path by {dkey}")
         fig.legend()

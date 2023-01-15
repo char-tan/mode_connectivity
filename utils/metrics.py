@@ -20,6 +20,9 @@ def JSD_loss(logits_P, logits_Q):
 
     return JSD
 
+def sqrt_JSD_loss(logits_P, logits_Q):
+    return torch.sqrt(JSD_loss(logits_P, logits_Q))
+
 def squared_euclid_dist(model_a, model_b, batch_imgs=None):
     if isinstance(model_a, torch.Tensor):
         a_vect = model_a
@@ -32,6 +35,9 @@ def squared_euclid_dist(model_a, model_b, batch_imgs=None):
         a_vect = state_dict_to_torch_tensor(model_a.state_dict())
         b_vect = state_dict_to_torch_tensor(model_b.state_dict())
     return ((a_vect - b_vect)**2).sum()
+
+def euclid_dist(model_a, model_b, batch_imgs=None):
+    return torch.sqrt(squared_euclid_dist(model_a, model_b))
 
 def index_distance(model_a, model_b, data=None):
     return torch.tensor(1)
