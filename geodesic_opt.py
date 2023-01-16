@@ -74,7 +74,7 @@ def optimise_for_geodesic(
                 snapshots.append({
                     'epoch_id': epoch_idx,
                     'batch_id': batch_idx,
-                    'weights': [super_model.models[i].state_dict() for i in range(len(super_model.models))]
+                    'weights': [copy.deepcopy((super_model.models[i]).state_dict()) for i in range(len(super_model.models))]
                 })
 
             path_length.backward()
