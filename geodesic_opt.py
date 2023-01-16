@@ -13,7 +13,6 @@ from utils.objectives import heuristic_triplets, full_params
 from utils.utils import lerp, get_device
 from utils.training_utils import test
 from utils.utils import load_checkpoint, intervals_to_cumulative_sums
-from utils.utils import state_dict_to_numpy_array, distance_to_line, generate_orthogonal_basis, projection
 from utils.metrics import JSD_loss
 from lmc import model_interpolation
 
@@ -237,26 +236,16 @@ def plot_lmc_geodesic_comparison_obj(
         fig.show()
         return fig, axs
 
-def geodesic_projection_plane(geodesic_weights):
-    # geodesic_weights = [super_model.models[i].state_dict() for i in range(len(super_model.models))]
-    v_start = state_dict_to_numpy_array(geodesic_weights[0])
-    v_end = state_dict_to_numpy_array(geodesic_weights[-1])
+# def geodesic_projection_plane(geodesic_weights, plane):
 
-    # find furthest point away from line connecting first and last model in param space
-    distances_to_line = [(distance_to_line(v_start, v_end, state_dict_to_numpy_array(weights))) for weights in geodesic_weights]
-    furthest_point = geodesic_weights[np.array(distances_to_line).argmax()]
-
-    # find plane defined by v_start, v_end, and furthest point from the line v_start -- v_end
-    furthest_point_plane = generate_orthogonal_basis(v_start, v_end, state_dict_to_numpy_array(furthest_point))
-
-    # project all other points onto this plane
-    v1 = state_dict_to_numpy_array(geodesic_weights[0])
-    furthest_projected_points = [projection(v1, furthest_point_plane)]
-    for weights in geodesic_weights[1:]:
-        vi = state_dict_to_numpy_array(weights)
-        furthest_projected_points.append(projection(vi, furthest_point_plane))
+#     # project all other points onto this plane
+#     v1 = state_dict_to_numpy_array(geodesic_weights[0])
+#     furthest_projected_points = [projection(v1, furthest_point_plane)]
+#     for weights in geodesic_weights[1:]:
+#         vi = state_dict_to_numpy_array(weights)
+#         furthest_projected_points.append(projection(vi, furthest_point_plane))
     
-    return furthest_projected_points
+#     return furthest_projected_points
     
 
 

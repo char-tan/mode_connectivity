@@ -75,21 +75,20 @@ def snapshot_plots(snapshots, save_path, experiment_name):
     # find plane defined by v_start, v_end, and furthest point from the line v_start -- v_end
     furthest_point_plane = generate_orthogonal_basis(v_start, v_end, state_dict_to_numpy_array(furthest_point))
 
-    straight_line_points = [
-        lerp_vectors(lam, v_start, v_end) for lam in np.linspace(0, 1, len(final_geodesic_weights) + 1)
-    ]
-
     for snapshot_i in snapshots:
-        geodesic_weights = snapshot_i['weights']
+        intermed_geodesic_weights = snapshot_i['weights']
 
         # project all other points onto this plane
-        v1 = state_dict_to_numpy_array(geodesic_weights[0])
-        furthest_projected_points = [projection(v1, furthest_point_plane)]
-        for weights in geodesic_weights[1:]:
+        furthest_projected_points = []
+        for weights in intermed_geodesic_weights:
             vi = state_dict_to_numpy_array(weights)
             furthest_projected_points.append(projection(vi, furthest_point_plane))
         
         fig_i, ax_i = plt.subplots()
+
+        straight_line_points = [
+            lerp_vectors(lam, furthest_projected_points[0], furthest_projected_points[-1]) for lam in np.linspace(0, 1, len(final_geodesic_weights) + 1)
+        ]
 
         ax_i.scatter(np.array(straight_line_points)[:,0],np.array(straight_line_points)[:,1], label='straight line')
         ax_i.scatter(np.array(furthest_projected_points)[:, 0], np.array(furthest_projected_points)[:, 1], label='projected points')
