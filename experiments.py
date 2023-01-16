@@ -31,8 +31,8 @@ def get_dataloaders(dataset, noise_var): # returns a (test, train) pair
     )
 
 mlp_config = (MLP, "mlp_mnist_model", "", "mnist")
-resnet_config = lambda n : (ResNet(width_multiplier=n), "resnet_wm", str(n), "cifar10")
-vgg_config = lambda n : (VGG(width_multiplier=n), "vgg_wm", str(n), "cifar10")
+resnet_config = lambda n : ((ResNet, {"width_multiplier": n}), "resnet_wm", str(n), "cifar10")
+vgg_config = lambda n : ((VGG, {"width_multiplier": n}), "vgg_wm", str(n), "cifar10")
 # see model_files folder for which numbers are valid
 
 def make_super(config, n, permuted, noise_var):
@@ -41,7 +41,11 @@ def make_super(config, n, permuted, noise_var):
     model_factory, name, name_n, dataset_name = config
     weights_a, weights_b = load_weights(name + name_n, permuted)
     trainloader, testloader = get_dataloaders(dataset_name, noise_var)
-    return SuperModel(config[0], n, weights_a, weights_b).to(device), trainloader, testloader, model_factory
+    if isinstance(config[0], tuple):
+        model_factory = lambda : config[0][0](**config[0][1])
+    else:
+        model_factory = lambda : config[0] 
+    return SuperModel(model_factory, n, weights_a, weights_b).to(device), trainloader, testloader, model_factory
 
 def rolling_mean(x, window):
     return np.convolve(x, np.ones(window), 'valid') / window
