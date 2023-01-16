@@ -172,6 +172,7 @@ def plot_lmc_geodesic_comparison_obj(
     comparison_obj, # either a single one, or pair (test, train)
     figsize=(10, 5),
     relative_x=False, # make x-axis from 0 to 1
+    only_metrics=None
 ):
     if not isinstance(comparison_obj, tuple) and "lengths" in comparison_obj["lmc"].keys():
         # Then we know this is using the "old-fashioned",
@@ -196,42 +197,56 @@ def plot_lmc_geodesic_comparison_obj(
             comparison_objs = comparison_obj
         distance_keys = list(comparison_objs[0]["lmc"].keys())
         distance_keys.remove("accuracies")
+        if only_metrics != None:
+            distance_keys = only_metrics
         num_dist_measures = len(distance_keys)
         fig, axs = plt.subplots(1, num_dist_measures, figsize=figsize, sharey=True)
         for i, dkey in enumerate(distance_keys):
-            for j, obj in enumerate(comparison_objs):
-                ax = axs[i]
-                lmc_xs = intervals_to_cumulative_sums(obj["lmc"][dkey])
-                lmc_accs = obj["lmc"]["accuracies"]
-                geodesic_xs = intervals_to_cumulative_sums(obj["geodesic"][dkey])
-                geodesic_accs = obj["geodesic"]["accuracies"]
-                extra_lbl = ""
-                if relative_x:
-                    lmc_xs /= lmc_xs.max()
-                    geodesic_xs /= geodesic_xs.max()
-                if len(comparison_objs) == 2:
-                    extra_lbl = ", test" if j == 0 else ", train"
-                ax.plot(
-                    lmc_xs,
-                    lmc_accs,
-                    label="lmc" + extra_lbl if i == 0 else None,
-                    linestyle="solid" if j == 0 else "dashed",
-                    # ^ solid for first (assumed test) dataloader, otherwise dashed,
-                    marker='.'
-                )
-                ax.plot(
-                    geodesic_xs,
-                    geodesic_accs,
-                    label="geodesic" + extra_lbl if i == 0 else None,
-                    linestyle="solid" if j == 0 else "dashed",
-                    marker='.'
-                )
-                if i == 0:
-                    ax.set_ylabel("Accuracy")
-                if relative_x:
-                    ax.set_xlabel(f"Relative distance along path by {dkey}")
-                else:
-                    ax.set_xlabel(f"Distance along path by {dkey}")
+            print(dkey)
+            if only_metrics == None or dkey in only_metrics:
+                for j, obj in enumerate(comparison_objs):
+                    if isinstance(axs, tuple):
+                        ax = axs[i]
+                    else:
+                        ax = axs
+                    lmc_xs = intervals_to_cumulative_sums(obj["lmc"][dkey])
+                    lmc_accs = obj["lmc"]["accuracies"]
+                    geodesic_xs = intervals_to_cumulative_sums(obj["geodesic"][dkey])
+                    geodesic_accs = obj["geodesic"]["accuracies"]
+                    is_test = j == 0
+                    extra_lbl = ""
+                    if relative_x:
+                        lmc_xs /= lmc_xs.max()
+                        geodesic_xs /= geodesic_xs.max()
+                    if len(comparison_objs) == 2:
+                        extra_lbl = ", test" if is_test else ", train"
+                    ax.plot(
+                        lmc_xs,
+                        lmc_accs,
+                        label="lmc" + extra_lbl if i == 0 else None,
+                        linestyle="dotted",#(0, (1, 3)),
+                        # ^ solid for first (assumed test) dataloader, otherwise dashed,
+                        marker='^',
+                        markersize=6,
+                        color="C1" if is_test else "C0",
+                        alpha=0.5
+                    )
+                    ax.plot(
+                        geodesic_xs,
+                        geodesic_accs,
+                        label="geodesic" + extra_lbl if i == 0 else None,
+                        linestyle="solid",
+                        linewidth=1,
+                        marker='o',
+                        markersize=5,
+                        color="C1" if is_test else "C0"
+                    )
+                    if i == 0:
+                        ax.set_ylabel("Accuracy")
+                    if relative_x:
+                        ax.set_xlabel(f"Relative distance along path by {dkey}")
+                    else:
+                        ax.set_xlabel(f"Distance along path by {dkey}")
         fig.legend()
         fig.show()
         return fig, axs
