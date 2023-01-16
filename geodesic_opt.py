@@ -25,8 +25,9 @@ def optimise_for_geodesic(
     dataloader,
     lr=0.01,
     num_epochs=1,
+    n_snapshots_per_epoch = 1,
     verbose=1,
-    loss_metric=JSD_loss
+    loss_metric=JSD_loss,
 ):
 
     """
@@ -37,6 +38,12 @@ def optimise_for_geodesic(
 
     path_lengths = []
     sq_euc_dists = []
+
+    n_interpolated = len(list(enumerate(dataloader)))
+    snapshot_ids = np.round(np.linspace(0, n_interpolated - 1, n_snapshots_per_epoch)).astype(int)
+    if (n_interpolated-1) not in snapshot_ids:
+        snapshot_ids.append((n_interpolated -1))
+    snapshots = []
 
     optimizer = torch.optim.SGD(super_model.parameters(), lr=lr)
 
@@ -49,9 +56,8 @@ def optimise_for_geodesic(
 
     for epoch_idx in range(num_epochs):
         if verbose > 0:
-            print(f"Epoch {epoch_idx} of {num_epochs}")
+            print(f"Epoch {epoch_idx+1} of {num_epochs}")
         for batch_idx, (data, target) in tqdm(list(enumerate(dataloader))):
-
             data, target = data.to(device), target.to(device)
             optimizer.zero_grad()
             outputs = super_model(data)
@@ -62,8 +68,14 @@ def optimise_for_geodesic(
 
             if verbose >= 2:
                 print(
-                    f"batch {batch_idx} | path length {path_length} | sq euc dist {sq_euc_dist}"
+                    f"batch {batch_idx+1} | path length {path_length} | sq euc dist {sq_euc_dist}"
                 )
+            if batch_idx in snapshot_ids:
+                snapshots.append({
+                    'epoch_id': epoch_idx,
+                    'batch_id': batch_idx,
+                    'weights': [copy.deepcopy((super_model.models[i]).state_dict()) for i in range(len(super_model.models))]
+                })
 
             path_length.backward()
             optimizer.step()
@@ -73,10 +85,10 @@ def optimise_for_geodesic(
 
         if verbose == 1:
             print(
-                f"epoch {epoch_idx} | path length {np.mean(path_lengths)} | sq euc dist {np.mean(sq_euc_dists)}"
+                f"epoch {epoch_idx+1} | path length {np.mean(path_lengths)} | sq euc dist {np.mean(sq_euc_dists)}"
             )
 
-    return path_lengths, sq_euc_dists
+    return path_lengths, sq_euc_dists, snapshots
 
 def compare_lmc_to_geodesic(
     geodesic_smodel,
@@ -223,6 +235,18 @@ def plot_lmc_geodesic_comparison_obj(
         fig.legend()
         fig.show()
         return fig, axs
+
+# def geodesic_projection_plane(geodesic_weights, plane):
+
+#     # project all other points onto this plane
+#     v1 = state_dict_to_numpy_array(geodesic_weights[0])
+#     furthest_projected_points = [projection(v1, furthest_point_plane)]
+#     for weights in geodesic_weights[1:]:
+#         vi = state_dict_to_numpy_array(weights)
+#         furthest_projected_points.append(projection(vi, furthest_point_plane))
+    
+#     return furthest_projected_points
+    
 
 
 # def plot_lmc_geodesic_comparison(
