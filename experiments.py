@@ -44,7 +44,7 @@ def make_super(config, n, permuted, noise_var):
     if isinstance(config[0], tuple):
         model_factory = lambda : config[0][0](**config[0][1])
     else:
-        model_factory = lambda : config[0] 
+        model_factory = config[0] 
     return SuperModel(model_factory, n, weights_a, weights_b).to(device), trainloader, testloader, model_factory
 
 def rolling_mean(x, window):
