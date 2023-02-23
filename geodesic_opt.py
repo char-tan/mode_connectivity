@@ -28,6 +28,8 @@ def optimise_for_geodesic(
     n_snapshots_per_epoch = 1,
     verbose=1,
     loss_metric=JSD_loss,
+    optimizer_class=torch.optim.SGD,
+    **optimizer_kwargs
 ):
 
     """
@@ -45,7 +47,7 @@ def optimise_for_geodesic(
         snapshot_ids.append((n_interpolated -1))
     snapshots = []
 
-    optimizer = torch.optim.SGD(super_model.parameters(), lr=lr)
+    optimizer = optimizer_class(super_model.parameters(), lr=lr, **optimizer_kwargs)
 
     print("Optimising geodesic ...")
     # for _ in tqdm(range(max_iterations)):
