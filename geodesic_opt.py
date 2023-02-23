@@ -29,6 +29,7 @@ def optimise_for_geodesic(
     verbose=1,
     loss_metric=JSD_loss,
     optimizer_class=torch.optim.SGD,
+    precision=torch.float32,
     **optimizer_kwargs
 ):
 
@@ -55,8 +56,8 @@ def optimise_for_geodesic(
     for epoch_idx in range(num_epochs):
         if verbose > 0:
             print(f"Epoch {epoch_idx+1} of {num_epochs}")
-        for batch_idx, (data, target) in tqdm(list(enumerate(dataloader))):
-            data, target = data.to(device), target.to(device)
+        for batch_idx, (data, target) in tqdm(enumerate(dataloader)):
+            data, target = data.to(device).to(precision), target.to(device).to(precision)
             optimizer.zero_grad()
             outputs = super_model(data)
 
