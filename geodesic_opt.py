@@ -84,7 +84,7 @@ def optimise_for_geodesic(
             path_lengths.append(path_length.item())
             sq_euc_dists.append(sq_euc_dist.item())
 
-        if verbose == 1:
+        if verbose >= 1:
             print(
                 f"epoch {epoch_idx+1} | path length {np.mean(path_lengths)} | sq euc dist {np.mean(sq_euc_dists)}"
             )
