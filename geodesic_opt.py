@@ -28,8 +28,8 @@ def optimise_for_geodesic(
     snapshot_interval=None,
     verbose=1,
     loss_metric=JSD_loss,
-    optimizer_class=torch.optim.SGD,
     precision=torch.float32,
+    optimizer_class=torch.optim.SGD,
     **optimizer_kwargs
 ):
 
