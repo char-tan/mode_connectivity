@@ -18,7 +18,7 @@ from utils import (
     LOGGING_COLUMNS_LIST,
 )
 from data import prep_data, get_batches
-from resnet import resnet18
+from resnet import resnet20
 
 
 def train_epoch(net, data, loss_fn, opt, lr_sched, epoch, config):
@@ -35,6 +35,7 @@ def train_epoch(net, data, loss_fn, opt, lr_sched, epoch, config):
         opt.zero_grad(set_to_none=True)
 
         outputs = net(inputs)
+
         loss = loss_fn(outputs, targets)
 
         train_acc.append((outputs.detach().argmax(-1) == targets).float().mean().item())
@@ -71,7 +72,7 @@ def eval_epoch(net, data, loss_fn, epoch, config):
 
 def setup_training(config):
 
-    net = resnet18(wm=config.wm).to(config.device).to(config.dtype)
+    net = resnet20(wm=config.wm).to(config.device).to(config.dtype)
 
     # split the params into non-bias and bias
     non_bias_params, bias_params = split_parameters(net)
@@ -134,6 +135,7 @@ def train_experiment(data, config):
         if best_acc is None:
             best_acc = eval_acc
         elif eval_acc > best_acc:
+            print('saving')
             torch.save(net.state_dict(), config.model_path)
             best_acc = eval_acc
 
@@ -151,11 +153,10 @@ if __name__ == "__main__":
 
     use_cuda = torch.cuda.is_available()
 
-    for wm in [1]:
+    for wm in [1, 4, 16]:
 
         config = Config(
             model_path = None,
-            # these ifs here so i can debug locally
             dtype=torch.float16 if use_cuda else torch.float32,
             device="cuda" if use_cuda else "cpu",
             num_train_samples = 50000 if use_cuda else 128,
@@ -165,6 +166,8 @@ if __name__ == "__main__":
         data = prep_data(config)
 
         for seed in [0, 1, 2]:
+
+            print(seed, wm)
 
             torch.manual_seed(seed)
             config.model_path = f'model_wm{wm}_seed{seed}.pt'

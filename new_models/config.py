@@ -18,7 +18,7 @@ class Config:
     lr: float = 1e-1
     div_factor = 1e9
     final_div_factor = 1e1
-    pct_start = 0.2
+    pct_start = 0.1
     momentum: float = 0.9
     weight_decay: float = 5e-4
     bias_scaler: float = 1

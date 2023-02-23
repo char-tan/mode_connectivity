@@ -185,7 +185,7 @@ def get_batches(data: TensorData, config, train=False):
     for idx in range(num_batches):
 
         slice_start = idx * config.batchsize
-        slice_end = min((idx + 1) * config.batchsize, num_samples - 1)
+        slice_end = min((idx + 1) * config.batchsize, num_samples)
 
         yield (
             images.index_select(0, permutation[slice_start:slice_end]),
