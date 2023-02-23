@@ -25,7 +25,7 @@ def optimise_for_geodesic(
     dataloader,
     lr=0.01,
     num_epochs=1,
-    n_snapshots_per_epoch = 1,
+    snapshot_interval=None,
     verbose=1,
     loss_metric=JSD_loss,
     optimizer_class=torch.optim.SGD,
@@ -41,10 +41,6 @@ def optimise_for_geodesic(
     path_lengths = []
     sq_euc_dists = []
 
-    n_interpolated = len(dataloader)
-    snapshot_ids = list(range(0, n_interpolated - 1, int(n_interpolated/n_snapshots_per_epoch)))
-    if (n_interpolated-1) not in snapshot_ids:
-        snapshot_ids.append((n_interpolated -1))
     snapshots = []
 
     optimizer = optimizer_class(super_model.parameters(), lr=lr, **optimizer_kwargs)
@@ -72,12 +68,14 @@ def optimise_for_geodesic(
                 print(
                     f"batch {batch_idx+1} | path length {path_length} | sq euc dist {sq_euc_dist}"
                 )
-            if batch_idx in snapshot_ids:
-                snapshots.append({
-                    'epoch_id': epoch_idx,
-                    'batch_id': batch_idx,
-                    'weights': [copy.deepcopy((super_model.models[i]).state_dict()) for i in range(len(super_model.models))]
-                })
+
+            if snapshot_interval:
+                if batch_idx % snapshot_interval == 0:
+                    snapshots.append({
+                        'epoch_id': epoch_idx,
+                        'batch_id': batch_idx,
+                        'weights': [copy.deepcopy((super_model.models[i]).state_dict()) for i in range(len(super_model.models))]
+                    })
 
             path_length.backward()
             optimizer.step()
