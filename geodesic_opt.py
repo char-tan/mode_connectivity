@@ -39,8 +39,8 @@ def optimise_for_geodesic(
     path_lengths = []
     sq_euc_dists = []
 
-    n_interpolated = len(list(enumerate(dataloader)))
-    snapshot_ids = np.round(np.linspace(0, n_interpolated - 1, n_snapshots_per_epoch)).astype(int)
+    n_interpolated = len(dataloader)
+    snapshot_ids = list(range(0, n_interpolated - 1, int(n_interpolated/n_snapshots_per_epoch)))
     if (n_interpolated-1) not in snapshot_ids:
         snapshot_ids.append((n_interpolated -1))
     snapshots = []
