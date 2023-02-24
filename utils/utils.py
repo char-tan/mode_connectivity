@@ -65,6 +65,12 @@ def lerp(lam, t1, t2):
     t3[p] = (1 - lam) * t1[p] + lam * t2[p]
   return t3
 
+def lerp_vectors(lam, p1, p2):
+  p3 = []
+  for x1, x2 in zip(p1, p2):
+    p3.append((1 - lam) * x1 + lam * x2)
+  return tuple(p3)
+
 def reconstruct(vector, example_state_dict):
   """Reconstruct a torch state_dict object from a numpy array representing a vector of model weights."""
   i = 0
@@ -88,6 +94,14 @@ def state_dict_to_numpy_array(model_params):
   keys = model_params.keys()
   v = np.concatenate([model_params[key].reshape([-1]).cpu() for key in keys],axis=0)
   return v
+
+def distance_to_line(p1, p2, p3):
+    line = p2- p1
+    point = p3 - p1
+    projected_point = np.dot(line, point)
+    pp = projected_point/np.linalg.norm(line)
+    pn = np.linalg.norm(point)
+    return np.sqrt(np.abs(pn**2 - pp**2)) # absolute function to account for rounding errors
 
 def generate_orthogonal_basis(v1, v2, v3):
   """Generate a two-dimensional plane, given any three points in space which define it."""

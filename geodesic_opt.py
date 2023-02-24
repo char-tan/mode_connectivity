@@ -25,8 +25,9 @@ def optimise_for_geodesic(
     dataloader,
     lr=0.01,
     num_epochs=1,
+    n_snapshots_per_epoch = 1,
     verbose=1,
-    loss_metric=JSD_loss
+    loss_metric=JSD_loss,
 ):
 
     """
@@ -37,6 +38,12 @@ def optimise_for_geodesic(
 
     path_lengths = []
     sq_euc_dists = []
+
+    n_interpolated = len(list(enumerate(dataloader)))
+    snapshot_ids = np.round(np.linspace(0, n_interpolated - 1, n_snapshots_per_epoch)).astype(int)
+    if (n_interpolated-1) not in snapshot_ids:
+        snapshot_ids.append((n_interpolated -1))
+    snapshots = []
 
     optimizer = torch.optim.SGD(super_model.parameters(), lr=lr)
 
@@ -49,9 +56,8 @@ def optimise_for_geodesic(
 
     for epoch_idx in range(num_epochs):
         if verbose > 0:
-            print(f"Epoch {epoch_idx} of {num_epochs}")
+            print(f"Epoch {epoch_idx+1} of {num_epochs}")
         for batch_idx, (data, target) in tqdm(list(enumerate(dataloader))):
-
             data, target = data.to(device), target.to(device)
             optimizer.zero_grad()
             outputs = super_model(data)
@@ -62,8 +68,14 @@ def optimise_for_geodesic(
 
             if verbose >= 2:
                 print(
-                    f"batch {batch_idx} | path length {path_length} | sq euc dist {sq_euc_dist}"
+                    f"batch {batch_idx+1} | path length {path_length} | sq euc dist {sq_euc_dist}"
                 )
+            if batch_idx in snapshot_ids:
+                snapshots.append({
+                    'epoch_id': epoch_idx,
+                    'batch_id': batch_idx,
+                    'weights': [copy.deepcopy((super_model.models[i]).state_dict()) for i in range(len(super_model.models))]
+                })
 
             path_length.backward()
             optimizer.step()
@@ -73,10 +85,10 @@ def optimise_for_geodesic(
 
         if verbose == 1:
             print(
-                f"epoch {epoch_idx} | path length {np.mean(path_lengths)} | sq euc dist {np.mean(sq_euc_dists)}"
+                f"epoch {epoch_idx+1} | path length {np.mean(path_lengths)} | sq euc dist {np.mean(sq_euc_dists)}"
             )
 
-    return path_lengths, sq_euc_dists
+    return path_lengths, sq_euc_dists, snapshots
 
 def compare_lmc_to_geodesic(
     geodesic_smodel,
@@ -85,6 +97,19 @@ def compare_lmc_to_geodesic(
     distance_metric,
     verbose = 1,
 ):
+    if isinstance(dataloader, tuple):
+        return tuple([
+            compare_lmc_to_geodesic(
+                geodesic_smodel,
+                model_factory,
+                specific_dataloader,
+                distance_metric,
+                verbose
+            )
+            for specific_dataloader in dataloader
+        ])
+    if isinstance(distance_metric, dict):
+        distance_metrics = tuple(distance_metric.values())
     n_points = len(geodesic_smodel.models)
     weights_a = geodesic_smodel.models[0].state_dict()
     weights_b = geodesic_smodel.models[-1].state_dict()
@@ -96,7 +121,7 @@ def compare_lmc_to_geodesic(
         weights_a,
         weights_b,
         dataloader,
-        distance_metric=distance_metric,
+        distance_metric=distance_metrics,
         verbose=1
     )
 
@@ -105,32 +130,139 @@ def compare_lmc_to_geodesic(
     geodesic_path_lengths, geodesic_path_accs = evaluate_supermodel(
         geodesic_smodel,
         dataloader,
-        distance_metric,
+        distance_metrics,
         verbose
     )
-
-    return {
-        "lmc": {
-            "lengths": lmc_path_lengths,
-            "accuracies": lmc_path_accs
-        },
-        "geodesic": {
-            "lengths": geodesic_path_lengths,
-            "accuracies": geodesic_path_accs
+    
+    if isinstance(distance_metric, dict):
+        lmc_dict = {
+            # key is the name of a distance function in the dict
+            # lmc_path_lengths[i] gets the values calculated for it
+            key : lmc_path_lengths[i]
+            for i, (key, value) in enumerate(distance_metric.items())
         }
-    }
+        geodesic_dict = {
+            key : geodesic_path_lengths[i]
+            for i, (key, value) in enumerate(distance_metric.items())
+        }
+        return {
+            "lmc": {
+                "accuracies": lmc_path_accs,
+                **lmc_dict
+            },
+            "geodesic": {
+                "accuracies": geodesic_path_accs,
+                **geodesic_dict
+            }
+        }        
+    else:
+        return {
+            "lmc": {
+                "lengths": lmc_path_lengths,
+                "accuracies": lmc_path_accs
+            },
+            "geodesic": {
+                "lengths": geodesic_path_lengths,
+                "accuracies": geodesic_path_accs
+            }
+        }
 
 
-def plot_lmc_geodesic_comparison_obj(comparison_obj):
-    fig, ax = plt.subplots()
-    lmc_xs = intervals_to_cumulative_sums(comparison_obj["lmc"]["lengths"])
-    lmc_accs = comparison_obj["lmc"]["accuracies"]
-    geodesic_xs = intervals_to_cumulative_sums(comparison_obj["geodesic"]["lengths"])
-    geodesic_accs = comparison_obj["geodesic"]["accuracies"]
-    ax.plot(lmc_xs, lmc_accs, label="lmc")
-    ax.plot(geodesic_xs, geodesic_accs, label="geodesic")
-    ax.legend()
-    fig.show()
+def plot_lmc_geodesic_comparison_obj(
+    comparison_obj, # either a single one, or pair (test, train)
+    figsize=(10, 5),
+    relative_x=False, # make x-axis from 0 to 1
+    only_metrics=None
+):
+    if not isinstance(comparison_obj, tuple) and "lengths" in comparison_obj["lmc"].keys():
+        # Then we know this is using the "old-fashioned",
+        # i.e. single-distance-returning, version of the
+        # behaviour of compare_lmc_to_geodesic
+        fig, ax = plt.subplots(figsize=figsize)
+        lmc_xs = intervals_to_cumulative_sums(comparison_obj["lmc"]["lengths"])
+        lmc_accs = comparison_obj["lmc"]["accuracies"]
+        geodesic_xs = intervals_to_cumulative_sums(comparison_obj["geodesic"]["lengths"])
+        geodesic_accs = comparison_obj["geodesic"]["accuracies"]
+        ax.plot(lmc_xs, lmc_accs, label="lmc")
+        ax.plot(geodesic_xs, geodesic_accs, label="geodesic")
+        ax.set_ylabel("Accuracy")
+        ax.set_xlabel("Distance along path by distance metric")
+        ax.legend()
+        fig.show()
+        return fig, ax
+    else:
+        if not isinstance(comparison_obj, tuple):
+            comparison_objs = (comparison_obj,)
+        else:
+            comparison_objs = comparison_obj
+        distance_keys = list(comparison_objs[0]["lmc"].keys())
+        distance_keys.remove("accuracies")
+        if only_metrics != None:
+            distance_keys = only_metrics
+        num_dist_measures = len(distance_keys)
+        fig, axs = plt.subplots(1, num_dist_measures, figsize=figsize, sharey=True)
+        for i, dkey in enumerate(distance_keys):
+            print(dkey)
+            if only_metrics == None or dkey in only_metrics:
+                for j, obj in enumerate(comparison_objs):
+                    if isinstance(axs, tuple):
+                        ax = axs[i]
+                    else:
+                        ax = axs
+                    lmc_xs = intervals_to_cumulative_sums(obj["lmc"][dkey])
+                    lmc_accs = obj["lmc"]["accuracies"]
+                    geodesic_xs = intervals_to_cumulative_sums(obj["geodesic"][dkey])
+                    geodesic_accs = obj["geodesic"]["accuracies"]
+                    is_test = j == 0
+                    extra_lbl = ""
+                    if relative_x:
+                        lmc_xs /= lmc_xs.max()
+                        geodesic_xs /= geodesic_xs.max()
+                    if len(comparison_objs) == 2:
+                        extra_lbl = ", test" if is_test else ", train"
+                    ax.plot(
+                        lmc_xs,
+                        lmc_accs,
+                        label="lmc" + extra_lbl if i == 0 else None,
+                        linestyle="dotted",#(0, (1, 3)),
+                        # ^ solid for first (assumed test) dataloader, otherwise dashed,
+                        marker='^',
+                        markersize=6,
+                        color="C1" if is_test else "C0",
+                        alpha=0.5
+                    )
+                    ax.plot(
+                        geodesic_xs,
+                        geodesic_accs,
+                        label="geodesic" + extra_lbl if i == 0 else None,
+                        linestyle="solid",
+                        linewidth=1,
+                        marker='o',
+                        markersize=5,
+                        color="C1" if is_test else "C0"
+                    )
+                    if i == 0:
+                        ax.set_ylabel("Accuracy")
+                    if relative_x:
+                        ax.set_xlabel(f"Relative distance along path by {dkey}")
+                    else:
+                        ax.set_xlabel(f"Distance along path by {dkey}")
+        fig.legend()
+        fig.show()
+        return fig, axs
+
+# def geodesic_projection_plane(geodesic_weights, plane):
+
+#     # project all other points onto this plane
+#     v1 = state_dict_to_numpy_array(geodesic_weights[0])
+#     furthest_projected_points = [projection(v1, furthest_point_plane)]
+#     for weights in geodesic_weights[1:]:
+#         vi = state_dict_to_numpy_array(weights)
+#         furthest_projected_points.append(projection(vi, furthest_point_plane))
+    
+#     return furthest_projected_points
+    
+
 
 # def plot_lmc_geodesic_comparison(
 #     comparison_obj, # <-- as returned by compare_lmc_to_geodesic
@@ -238,6 +370,8 @@ if __name__ == "__main__":
     # %%
 
     plot_lmc_geodesic_comparison_obj(comparison)
+
+    # NOW: SEE THE geodesic_experiments.ipynb NOTEBOOK FOR USE EXAMPLES
 
     
     # %%

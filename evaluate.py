@@ -49,27 +49,36 @@ def evaluate_supermodel(
 
     device, _ = get_device()
 
+    distance_metrics = distance_metric if isinstance(distance_metric, tuple) else [distance_metric] 
+
     path_accs = []
-    path_lengths = []
+    path_lengths_lists = [[] for _ in distance_metrics]
     print("Calculating path length and acc over SuperModel:")
     with torch.no_grad():
         for batch_idx, (data, target) in tqdm(list(enumerate(dataloader))):
             data, target = data.to(device), target.to(device)
             outputs = super_model(data)
-            path_length = metric_path_length(
-                outputs,
-                loss_metric=distance_metric,
-                return_stepwise=True
-            )
+            
             path_acc = acc_on_path(outputs, target)
             mean_path_acc = path_acc.mean()
+            path_accs.append(path_acc.cpu().numpy())
+            
+            for i, distance_metric in enumerate(distance_metrics):
+                path_length = metric_path_length(
+                    outputs,
+                    loss_metric=distance_metric,
+                    return_stepwise=True
+                )
+                path_lengths_lists[i].append(path_length)
+
             if verbose >= 2:
                 print(
-                    f"batch {batch_idx} | path length {path_length.sum()} | mean path acc {mean_path_acc}"
+                    f"batch {batch_idx} | path length {[path_lengths_lists[i][-1].sum() for i in range(len(distance_metrics))]} | mean path acc {mean_path_acc}"
                 )
-            path_accs.append(path_acc.cpu().numpy())
-            path_lengths.append(path_length)
-    return np.mean(np.stack(path_lengths), axis=0), np.mean(np.stack(path_accs), axis=0)
+    return_lengths_list = [np.mean(np.stack(path_lengths), axis=0) for path_lengths in path_lengths_lists]
+    if len(return_lengths_list) == 1:
+        return_lengths_list = return_lengths_list[0]
+    return return_lengths_list, np.mean(np.stack(path_accs), axis=0)
 
 def evaluate_lmc(
     model_factory,
@@ -86,9 +95,10 @@ def evaluate_lmc(
     to dataloader, returns mean step-wise path length,
     and mean model-wise accuracy
     """
+    device, _ = get_device()
     weights_a = copy.deepcopy(weights_a)
     weights_b = copy.deepcopy(weights_b)
-    lmc_super_model = SuperModel(model_factory, n, weights_a, weights_b)
+    lmc_super_model = SuperModel(model_factory, n, weights_a, weights_b).to(device)
     return evaluate_supermodel(
         lmc_super_model,
         dataloader,
