@@ -33,14 +33,18 @@ class SuperModel(nn.Module):
 
         self.models = nn.ModuleList(all_models)
 
-    def forward(self, x):
+    def forward(self, x, from_device=None, to_device=None):
 
         #x = x.view(x.shape[0], -1)
 
         outputs = []
 
         for model in self.models:
+            if from_device:
+                model = model.to(to_device)
             outputs.append(model(x.clone()))
+            if from_device:
+                model = model.to(from_device)
 
         return outputs
 

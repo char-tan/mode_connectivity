@@ -29,6 +29,8 @@ def optimise_for_geodesic(
     verbose=1,
     loss_metric=JSD_loss,
     precision=torch.float32,
+    from_device=None,
+    to_device=None,
     optimizer_class=torch.optim.SGD,
     **optimizer_kwargs
 ):
@@ -59,7 +61,7 @@ def optimise_for_geodesic(
         for batch_idx, (data, target) in tqdm(enumerate(dataloader)):
             data, target = data.to(device).to(precision), target.to(device).to(precision)
             optimizer.zero_grad()
-            outputs = super_model(data)
+            outputs = super_model(data, from_device, to_device)
 
             path_length = metric_path_length(outputs, loss_metric=loss_metric)
 
