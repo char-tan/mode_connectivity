@@ -16,6 +16,8 @@ from utils.utils import load_checkpoint, intervals_to_cumulative_sums
 from utils.metrics import JSD_loss
 from lmc import model_interpolation
 
+from pathlib import Path
+
 # ^ THIS DOES WORK AAAAAAA :)
 
 
@@ -32,6 +34,7 @@ def optimise_for_geodesic(
     from_device=None,
     to_device=None,
     optimizer_class=torch.optim.SGD,
+    snapshot_loc=None,
     **optimizer_kwargs
 ):
 
@@ -44,7 +47,10 @@ def optimise_for_geodesic(
     path_lengths = []
     sq_euc_dists = []
 
-    snapshots = []
+    if snapshot_loc is None:
+        snapshot_loc = Path("./snapshots/")
+    else:
+        snapshot_loc = Path(snapshot_loc)
 
     optimizer = optimizer_class(super_model.parameters(), lr=lr, **optimizer_kwargs)
 
@@ -74,11 +80,11 @@ def optimise_for_geodesic(
 
             if snapshot_interval:
                 if batch_idx % snapshot_interval == 0:
-                    snapshots.append({
+                    torch.save({
                         'epoch_id': epoch_idx,
                         'batch_id': batch_idx,
-                        'weights': [copy.deepcopy((super_model.models[i]).state_dict()) for i in range(len(super_model.models))]
-                    })
+                        'weights': [model.state_dict() for model in super_model.models]
+                    }, f=snapshot_loc / f"snapshot_e{epoch_idx}_b{batch_idx}.pt")
 
             path_length.backward()
             optimizer.step()
@@ -91,7 +97,7 @@ def optimise_for_geodesic(
                 f"epoch {epoch_idx+1} | path length {np.mean(path_lengths)} | sq euc dist {np.mean(sq_euc_dists)}"
             )
 
-    return path_lengths, sq_euc_dists, snapshots
+    return path_lengths, sq_euc_dists
 
 def compare_lmc_to_geodesic(
     geodesic_smodel,
