@@ -52,6 +52,7 @@ class SuperModel(nn.Module):
     def sq_euc_dist(self):
 
         total = 0
+        sqrt_total = 0
 
         state_dict_a = self.models[0].state_dict()
 
@@ -64,7 +65,8 @@ class SuperModel(nn.Module):
             model_vec_b = state_dict_to_torch_tensor(state_dict_b)
 
             total += ((model_vec_a - model_vec_b)**2).sum()
+            sqrt_total += torch.sqrt(((model_vec_a - model_vec_b)**2).sum())
 
             model_vec_a = model_vec_b
 
-        return total
+        return total, sqrt_total

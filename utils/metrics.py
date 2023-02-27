@@ -48,6 +48,7 @@ def metric_path_length(outputs, loss_metric=JSD_loss, return_stepwise=False):
     """
 
     total = 0
+    sqrt_total = 0
     stepwise = []
 
     for i in range(0, len(outputs) - 1):
@@ -55,12 +56,13 @@ def metric_path_length(outputs, loss_metric=JSD_loss, return_stepwise=False):
         length = loss_metric(outputs[i], outputs[i + 1])
 
         total += length
+        sqrt_total += torch.sqrt(length)
         stepwise.append(length.item())
 
     if return_stepwise:
         return np.array(stepwise)
     else:
-        return total
+        return total, sqrt_total
 
 # OLD VERSION:
 # def metric_path_length(all_models, loss_metric, data, track_grad = False):

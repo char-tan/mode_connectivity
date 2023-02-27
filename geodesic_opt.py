@@ -69,9 +69,9 @@ def optimise_for_geodesic(
             optimizer.zero_grad()
             outputs = super_model(data, from_device, to_device)
 
-            path_length = metric_path_length(outputs, loss_metric=loss_metric)
+            path_length, sqrt_path_length = metric_path_length(outputs, loss_metric=loss_metric)
 
-            sq_euc_dist = super_model.sq_euc_dist()
+            sq_euc_dist, euc_dist = super_model.sq_euc_dist()
 
             if verbose >= 2:
                 print(
@@ -89,8 +89,8 @@ def optimise_for_geodesic(
             path_length.backward()
             optimizer.step()
 
-            path_lengths.append(path_length.item())
-            sq_euc_dists.append(sq_euc_dist.item())
+            path_lengths.append(sqrt_path_length.item())
+            sq_euc_dists.append(euc_dist.item())
 
         if verbose >= 1:
             print(
